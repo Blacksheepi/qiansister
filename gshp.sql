@@ -35,7 +35,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: project_detail; Type: TABLE; Schema: public; Owner: test
+-- Name: project_detail; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE project_detail (
@@ -50,11 +50,11 @@ CREATE TABLE project_detail (
     project_name text
 );
 
-
-ALTER TABLE project_detail OWNER TO test;
-
 --
--- Name: project_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+--ALTER TABLE project_detail OWNER TO postgres;
+--
+--
+-- Name: project_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE project_detail_id_seq
@@ -66,17 +66,17 @@ CREATE SEQUENCE project_detail_id_seq
     CACHE 1;
 
 
-ALTER TABLE project_detail_id_seq OWNER TO test;
+--ALTER TABLE project_detail_id_seq OWNER TO postgres;
 
 --
--- Name: project_detail_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+-- Name: project_detail_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE project_detail_id_seq OWNED BY project_detail.id;
 
 
 --
--- Name: projects; Type: TABLE; Schema: public; Owner: test
+-- Name: projects; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE projects (
@@ -95,10 +95,10 @@ CREATE TABLE projects (
 );
 
 
-ALTER TABLE projects OWNER TO test;
+--ALTER TABLE projects OWNER TO postgres;
 
 --
--- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+-- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE projects_id_seq
@@ -110,17 +110,17 @@ CREATE SEQUENCE projects_id_seq
     CACHE 1;
 
 
-ALTER TABLE projects_id_seq OWNER TO test;
+ALTER TABLE projects_id_seq OWNER TO postgres;
 
 --
--- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+-- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: test
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE users (
@@ -131,10 +131,10 @@ CREATE TABLE users (
 );
 
 
-ALTER TABLE users OWNER TO test;
+ALTER TABLE users OWNER TO postgres;
 
 --
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: test
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE user_id_seq
@@ -146,38 +146,38 @@ CREATE SEQUENCE user_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_id_seq OWNER TO test;
+ALTER TABLE user_id_seq OWNER TO postgres;
 
 --
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE user_id_seq OWNED BY users.id;
 
 
 --
--- Name: project_detail id; Type: DEFAULT; Schema: public; Owner: test
+-- Name: project_detail id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY project_detail ALTER COLUMN id SET DEFAULT nextval('project_detail_id_seq'::regclass);
 
 
 --
--- Name: projects id; Type: DEFAULT; Schema: public; Owner: test
+-- Name: projects id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: test
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
 
 
 --
--- Data for Name: project_detail; Type: TABLE DATA; Schema: public; Owner: test
+-- Data for Name: project_detail; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY project_detail (id, "time", tgo, tg, a, n, cop, eer, project_name) FROM stdin;
@@ -185,7 +185,7 @@ COPY project_detail (id, "time", tgo, tg, a, n, cop, eer, project_name) FROM std
 
 
 --
--- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: test
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY projects (id, tgo, tg, a, n, cop, eer, res, project_name, area, "position", type) FROM stdin;
@@ -201,38 +201,38 @@ COPY projects (id, tgo, tg, a, n, cop, eer, res, project_name, area, "position",
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: test
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY users (id, username, password, user_id) FROM stdin;
-1	test	test	\N
+1	postgres	postgres	\N
 2	dym	dym	\N
 \.
 
 
 --
--- Name: project_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+-- Name: project_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('project_detail_id_seq', 1, false);
 
 
 --
--- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('projects_id_seq', 8, true);
 
 
 --
--- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
+-- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('user_id_seq', 2, true);
 
 
 --
--- Name: project_detail project_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: project_detail project_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY project_detail
@@ -240,7 +240,7 @@ ALTER TABLE ONLY project_detail
 
 
 --
--- Name: project_detail project_detail_project_name_key; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: project_detail project_detail_project_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY project_detail
@@ -248,7 +248,7 @@ ALTER TABLE ONLY project_detail
 
 
 --
--- Name: projects projects_name_key; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: projects projects_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY projects
@@ -256,7 +256,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY projects
@@ -264,7 +264,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- Name: users user_pkey; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: users user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY users
@@ -272,7 +272,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY users
@@ -280,7 +280,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users users_user_id_key; Type: CONSTRAINT; Schema: public; Owner: test
+-- Name: users users_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY users
