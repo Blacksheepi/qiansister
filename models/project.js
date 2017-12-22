@@ -3,7 +3,7 @@ import db from '../lib/db'
 
 export default {
 	createProject (table,projectName, callback) {
-		dataFormat(table, projectName);
+		let items = dataFormat(table, projectName);
 		let unionStr = ''
 		for (let item of items) {
             unionStr += `select ${item.project_name}, ${time}, ${item.tgo}, ${item.tg}, ${item.a}, ${item.n}, ${item.cop}, ${item.eer} union all`
@@ -34,5 +34,5 @@ function dataFormat(table, projectName) {
     	item.project_name = projectName;
     	res.push(item);
     }
-    console.log('aaaaaaaa',res);
+    return res;
 }
