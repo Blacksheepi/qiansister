@@ -15,9 +15,7 @@ export default {
 		let q = 'INSERT INTO project_detail(project_name, time, tgo, tg, a, n, cop, eer) ';
 		q += unionStr;
 		db.executeQuery(q, [], (err, data) => {
-			console.log('err', err);
-			console.log('data', data);
-			callback(data);
+			callback(err, data);
 		});
 	},
 	viewProject (projectName, callback) {

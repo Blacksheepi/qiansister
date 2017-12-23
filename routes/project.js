@@ -8,6 +8,11 @@ router.post('/', (req, res, next) => {
     let body = req.body;
     let table = body.table;
     let projectName = body.projectName;
+    if (!table || !projectName) {
+        res.status(400).json({
+            msg: '请求参数错误'
+        });
+    }
     project.createProject(table, projectName, (err, data)=> {
     	if (err) {
     		res.status(500).json({
@@ -23,6 +28,11 @@ router.post('/', (req, res, next) => {
 
 router.get('/', (req, res, next) => {
     let projectName = req.query.projectName;
+    if (!projectName) {
+        res.status(400).json({
+            msg: '请求参数错误'
+        });
+    }
     project.viewProject(projectName, (err, data) => {
     	if (err) {
             res.status(500).json({
