@@ -35,26 +35,26 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: project_detail; Type: TABLE; Schema: public; Owner: postgres
+-- Name: project_detail; Type: TABLE; Schema: public; Owner: test
 --
 
 CREATE TABLE project_detail (
     id integer NOT NULL,
-    "time" time without time zone,
     tgo double precision NOT NULL,
     tg double precision NOT NULL,
     a double precision NOT NULL,
     n double precision NOT NULL,
     cop double precision NOT NULL,
     eer double precision NOT NULL,
-    project_name text
+    project_name text NOT NULL,
+    "time" text NOT NULL
 );
 
+
+ALTER TABLE project_detail OWNER TO test;
+
 --
---ALTER TABLE project_detail OWNER TO postgres;
---
---
--- Name: project_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: project_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: test
 --
 
 CREATE SEQUENCE project_detail_id_seq
@@ -66,17 +66,17 @@ CREATE SEQUENCE project_detail_id_seq
     CACHE 1;
 
 
---ALTER TABLE project_detail_id_seq OWNER TO postgres;
+ALTER TABLE project_detail_id_seq OWNER TO test;
 
 --
--- Name: project_detail_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: project_detail_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
 --
 
 ALTER SEQUENCE project_detail_id_seq OWNED BY project_detail.id;
 
 
 --
--- Name: projects; Type: TABLE; Schema: public; Owner: postgres
+-- Name: projects; Type: TABLE; Schema: public; Owner: test
 --
 
 CREATE TABLE projects (
@@ -95,10 +95,10 @@ CREATE TABLE projects (
 );
 
 
---ALTER TABLE projects OWNER TO postgres;
+ALTER TABLE projects OWNER TO test;
 
 --
--- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: test
 --
 
 CREATE SEQUENCE projects_id_seq
@@ -110,17 +110,17 @@ CREATE SEQUENCE projects_id_seq
     CACHE 1;
 
 
-ALTER TABLE projects_id_seq OWNER TO postgres;
+ALTER TABLE projects_id_seq OWNER TO test;
 
 --
--- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
 --
 
 ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: test
 --
 
 CREATE TABLE users (
@@ -131,10 +131,10 @@ CREATE TABLE users (
 );
 
 
-ALTER TABLE users OWNER TO postgres;
+ALTER TABLE users OWNER TO test;
 
 --
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: test
 --
 
 CREATE SEQUENCE user_id_seq
@@ -146,46 +146,86 @@ CREATE SEQUENCE user_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_id_seq OWNER TO postgres;
+ALTER TABLE user_id_seq OWNER TO test;
 
 --
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: test
 --
 
 ALTER SEQUENCE user_id_seq OWNED BY users.id;
 
 
 --
--- Name: project_detail id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: project_detail id; Type: DEFAULT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY project_detail ALTER COLUMN id SET DEFAULT nextval('project_detail_id_seq'::regclass);
 
 
 --
--- Name: projects id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: projects id; Type: DEFAULT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
 
 
 --
--- Data for Name: project_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: project_detail; Type: TABLE DATA; Schema: public; Owner: test
 --
 
-COPY project_detail (id, "time", tgo, tg, a, n, cop, eer, project_name) FROM stdin;
+COPY project_detail (id, tgo, tg, a, n, cop, eer, project_name, "time") FROM stdin;
+4	20.3000000000000007	1.80000000000000004	0.760000000000000009	0.309999999999999998	4.71999999999999975	2.18000000000000016	project1	2017/12/22 13:55
+3	20.1999999999999993	1.80000000000000004	0.760000000000000009	0.320000000000000007	4.80999999999999961	2.16999999999999993	project1	2017/12/22 13:50
+6	21.1000000000000014	1.85000000000000009	0.650000000000000022	0.330000000000000016	4.75	2.14999999999999991	project1	2017/12/22 14:05
+5	20.6000000000000014	1.87000000000000011	0.760000000000000009	0.340000000000000024	4.70999999999999996	2.18999999999999995	project1	2017/12/22 14:00
+7	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.75999999999999979	2.16999999999999993	project1	2017/12/22 14:10
+11	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project2	2017/12/22 13:50
+12	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project2	2017/12/22 13:55
+13	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project2	2017/12/22 14:00
+14	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project2	2017/12/22 14:05
+15	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project2	2017/12/22 14:10
+26	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project3	2017/12/22 13:50
+27	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project3	2017/12/22 13:55
+28	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project3	2017/12/22 14:00
+29	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project3	2017/12/22 14:05
+30	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project3	2017/12/22 14:10
+31	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project4	2017/12/22 13:50
+32	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project4	2017/12/22 13:55
+33	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project4	2017/12/22 14:00
+34	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project4	2017/12/22 14:05
+35	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project4	2017/12/22 14:10
+36	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project5	2017/12/22 13:50
+37	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project5	2017/12/22 13:55
+38	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project5	2017/12/22 14:00
+39	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project5	2017/12/22 14:05
+40	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project5	2017/12/22 14:10
+46	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project6	2017/12/22 13:50
+47	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project6	2017/12/22 13:55
+48	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project6	2017/12/22 14:00
+49	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project6	2017/12/22 14:05
+50	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project6	2017/12/22 14:10
+61	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project7	2017/12/22 13:50
+62	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project7	2017/12/22 13:55
+63	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project7	2017/12/22 14:00
+64	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project7	2017/12/22 14:05
+65	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project7	2017/12/22 14:10
+66	22.1999999999999993	1.89999999999999991	0.660000000000000031	0.320000000000000007	4.61000000000000032	2.27000000000000002	project8	2017/12/22 13:50
+67	23.3000000000000007	1.89999999999999991	0.660000000000000031	0.369999999999999996	4.71999999999999975	2.2799999999999998	project8	2017/12/22 13:55
+68	20.6000000000000014	1.87000000000000011	0.699999999999999956	0.340000000000000024	4.50999999999999979	2.18999999999999995	project8	2017/12/22 14:00
+69	21.1000000000000014	1.94999999999999996	0.650000000000000022	0.299999999999999989	4.75	2.25	project8	2017/12/22 14:05
+70	21.1999999999999993	1.75	0.680000000000000049	0.320000000000000007	4.55999999999999961	2.16999999999999993	project8	2017/12/22 14:10
 \.
 
 
 --
--- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: test
 --
 
 COPY projects (id, tgo, tg, a, n, cop, eer, res, project_name, area, "position", type) FROM stdin;
@@ -201,38 +241,38 @@ COPY projects (id, tgo, tg, a, n, cop, eer, res, project_name, area, "position",
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: test
 --
 
 COPY users (id, username, password, user_id) FROM stdin;
-1	postgres	postgres	\N
+1	test	test	\N
 2	dym	dym	\N
 \.
 
 
 --
--- Name: project_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: project_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
 --
 
-SELECT pg_catalog.setval('project_detail_id_seq', 1, false);
+SELECT pg_catalog.setval('project_detail_id_seq', 70, true);
 
 
 --
--- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
 --
 
 SELECT pg_catalog.setval('projects_id_seq', 8, true);
 
 
 --
--- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: test
 --
 
 SELECT pg_catalog.setval('user_id_seq', 2, true);
 
 
 --
--- Name: project_detail project_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: project_detail project_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY project_detail
@@ -240,15 +280,7 @@ ALTER TABLE ONLY project_detail
 
 
 --
--- Name: project_detail project_detail_project_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY project_detail
-    ADD CONSTRAINT project_detail_project_name_key UNIQUE (project_name);
-
-
---
--- Name: projects projects_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: projects projects_name_key; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY projects
@@ -256,7 +288,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY projects
@@ -264,7 +296,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- Name: users user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users user_pkey; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY users
@@ -272,7 +304,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY users
@@ -280,7 +312,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: users users_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_user_id_key; Type: CONSTRAINT; Schema: public; Owner: test
 --
 
 ALTER TABLE ONLY users
