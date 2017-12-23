@@ -12,18 +12,19 @@ router.post('/', (req, res, next) => {
         res.status(400).json({
             msg: '请求参数错误'
         });
-    }
-    project.createProject(table, projectName, (err, data)=> {
-    	if (err) {
-    		res.status(500).json({
-    			msg: '数据存入失败！'
-    		});
-    	} else {
-    		res.status(201).json({
-    			msg: '数据成功存入！'
-    		});
-    	}
+    } else {
+        project.createProject(table, projectName, (err, data)=> {
+        if (err) {
+            res.status(500).json({
+                msg: '数据存入失败！'
+            });
+        } else {
+            res.status(201).json({
+                msg: '数据成功存入！'
+            });
+        }
     });
+    }
 });
 
 router.get('/', (req, res, next) => {
@@ -32,16 +33,17 @@ router.get('/', (req, res, next) => {
         res.status(400).json({
             msg: '请求参数错误'
         });
-    }
-    project.viewProject(projectName, (err, data) => {
-    	if (err) {
+    } else {
+        project.viewProject(projectName, (err, data) => {
+        if (err) {
             res.status(500).json({
-            	msg: 'something wrong when fetch data.'
+                msg: 'something wrong when fetch data.'
             });
-    	} else {
-         	res.json(data);
-    	}
+        } else {
+            res.json(data);
+        }
     });
+    }
 });
 
 export default router;
