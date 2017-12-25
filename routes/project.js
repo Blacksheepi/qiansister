@@ -45,7 +45,7 @@ router.get('/', (req, res, next) => {
             });
         } else {
             let projectDetail = data.projectDetail;
-            let projectInfo = data.projectInfo;
+            let projectInfo = data.projectInfo[0];
             let obj = {};
             obj.table = projectDetail;
             for (let key of Object.keys(projectInfo)) {
