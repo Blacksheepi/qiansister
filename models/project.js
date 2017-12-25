@@ -33,7 +33,7 @@ export default {
 		    		projectInfo
 		    	}
 		    	console.log('model res', res);
-			    callback(err, res);
+			    callback(err, data);
 		    });
 		});
 	}
