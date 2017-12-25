@@ -38,20 +38,21 @@ router.get('/', (req, res, next) => {
         let projectInfo;
 
         project.viewProject(projectName, (err, data) => {
-            console.log(err)
-            console.log(data);
-        
-            console.log(222);
-            console.log(data); 
+            
+        if (err) {
+            res.status(500).json({
+                msg: 'something wrong when fetch data.'
+            });
+        } else {
             let projectDetail = data.projectDetail;
             let projectInfo = data.projectInfo;
-            //let data = {};
-            // data.table = projectDetail;
-            // for (let key of Object.keys(projectInfo)) {
-            //     data[key] = projectInfo[key];
-            // }
-            // res.json(data);
-            //         
+            let obj = {};
+            obj.table = projectDetail;
+            for (let key of Object.keys(projectInfo)) {
+                obj[key] = projectInfo[key];
+            }
+            res.json(data);
+        }
         });
     }
 });
