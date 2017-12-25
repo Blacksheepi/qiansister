@@ -39,6 +39,7 @@ router.get('/', (req, res, next) => {
 
         project.viewProject(projectName, (err, data) => {
             console.log(222)
+            console.log(err)
         if (err) {
             res.status(500).json({
                 msg: 'something wrong when fetch data.'
