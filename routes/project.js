@@ -38,7 +38,6 @@ router.get('/', (req, res, next) => {
         let projectInfo;
 
         project.viewProject(projectName, (err, data) => {
-            console.log(222)
             console.log(err)
             console.log(data);
         if (err) {
@@ -46,7 +45,8 @@ router.get('/', (req, res, next) => {
                 msg: 'something wrong when fetch data.'
             });
         } else {
-            console.log('route data', data); 
+            console.log(222);
+            console.log(data); 
             let projectDetail = data.projectDetail;
             let projectInfo = data.projectInfo;
             let data = {};
