@@ -34,13 +34,24 @@ router.get('/', (req, res, next) => {
             msg: '请求参数错误'
         });
     } else {
+        let projectDetail;
+        let projectInfo;
+
         project.viewProject(projectName, (err, data) => {
         if (err) {
             res.status(500).json({
                 msg: 'something wrong when fetch data.'
             });
         } else {
-            res.json(data);
+            projectDetail = data;
+        }
+    }, (eer, data) => {
+        if (err) {
+            res.status(500).json({
+                msg: 'something wrong when fetch data.'
+            });
+        } else {
+            projectInfo = data;
         }
     });
     }
