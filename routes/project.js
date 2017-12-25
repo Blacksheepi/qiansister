@@ -54,6 +54,12 @@ router.get('/', (req, res, next) => {
             projectInfo = data;
         }
     });
+        let data = {};
+        res.table = projectDetail;
+        for (let key of Object.keys(projectInfo)) {
+            data[key] = projectInfo[key];
+        }
+        res.json(data);
     }
 });
 
