@@ -20,6 +20,7 @@ export default {
 	},
 	viewProject (projectName, callback) {
 		let q1 = `SELECT * FROM project_detail WHERE project_name = '${projectName}'`;
+		let res = {};
 		db.executeQuery(q1, [], (err, data) => {
 			if (err) {
 				callback(err);
@@ -28,12 +29,10 @@ export default {
 			let q2 = `SELECT * FROM projects WHERE project_name = '${projectName}'`;
 		    db.executeQuery(q2, [], (err, data) => {
 		    	let projectInfo = data;
-		    	let res = {
-		    		projectDetail,
-		    		projectInfo
-		    	}
+		    	res.projectInfo = projectInfo;
+		    	res.projectDetail = projectDetail;
 		    	console.log('model res', res);
-			    callback(err, data);
+			    callback(err, res);
 		    });
 		});
 	}
