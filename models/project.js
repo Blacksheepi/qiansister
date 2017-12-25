@@ -23,7 +23,7 @@ export default {
 		db.executeQuery(q1, [], (err, data) => {
 			callback1(err, data);
 		});
-		let q2 = `SELECT * FROM project WHERE project_name = '${projectName}'`;
+		let q2 = `SELECT * FROM projects WHERE project_name = '${projectName}'`;
 		db.executeQuery(q2, [], (err, data) => {
 			callback2(err, data);
 		});
