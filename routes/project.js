@@ -40,11 +40,7 @@ router.get('/', (req, res, next) => {
         project.viewProject(projectName, (err, data) => {
             console.log(err)
             console.log(data);
-        if (err) {
-            res.status(500).json({
-                msg: 'something wrong when fetch data.'
-            });
-        } else {
+        
             console.log(222);
             console.log(data); 
             let projectDetail = data.projectDetail;
@@ -55,8 +51,7 @@ router.get('/', (req, res, next) => {
                 data[key] = projectInfo[key];
             }
             res.json(data);
-            }
-        });
+                    });
     }
 });
 
