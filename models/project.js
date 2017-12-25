@@ -18,14 +18,23 @@ export default {
 			callback(err, data);
 		});
 	},
-	viewProject (projectName, callback1, callback2) {
+	viewProject (projectName, callback) {
 		let q1 = `SELECT * FROM project_detail WHERE project_name = '${projectName}'`;
 		db.executeQuery(q1, [], (err, data) => {
-			callback1(err, data);
-		});
-		let q2 = `SELECT * FROM projects WHERE project_name = '${projectName}'`;
-		db.executeQuery(q2, [], (err, data) => {
-			callback2(err, data);
+			if (err) {
+				callback(err);
+			}
+			let projectDetail = data;
+			let q2 = `SELECT * FROM projects WHERE project_name = '${projectName}'`;
+		    db.executeQuery(q2, [], (err, data) => {
+		    	let projectInfo = data;
+		    	let res = {
+		    		projectDetail,
+		    		projectInfo
+		    	}
+		    	console.log('model res', res);
+			    callback(err, res);
+		    });
 		});
 	}
 }
