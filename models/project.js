@@ -25,6 +25,7 @@ export default {
 		});
 		let q2 = `SELECT * FROM projects WHERE project_name = '${projectName}'`;
 		db.executeQuery(q2, [], (err, data) => {
+			console.log('data', data);
 			callback2(err, data);
 		});
 	}
