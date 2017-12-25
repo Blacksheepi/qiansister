@@ -51,7 +51,7 @@ router.get('/', (req, res, next) => {
                 msg: 'something wrong when fetch data.'
             });
         } else {
-            projectInfo = data;
+            projectInfo = data[0];
             let data = {};
             res.table = projectDetail;
             for (let key of Object.keys(projectInfo)) {
