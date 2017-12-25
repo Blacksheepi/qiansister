@@ -53,16 +53,7 @@ router.get('/', (req, res, next) => {
             }
             res.json(data);
             }
-        }
-    }, (err, data) => {
-        if (err) {
-            res.status(500).json({
-                msg: 'something wrong when fetch data.'
-            });
-        } else {
-            projectInfo = data[0];
-            
-    });
+        });
     }
 });
 
