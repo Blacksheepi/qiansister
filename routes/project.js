@@ -52,14 +52,14 @@ router.get('/', (req, res, next) => {
             });
         } else {
             projectInfo = data;
-        }
+            let data = {};
+            res.table = projectDetail;
+            for (let key of Object.keys(projectInfo)) {
+                data[key] = projectInfo[key];
+            }
+            res.json(data);
+            }
     });
-        let data = {};
-        res.table = projectDetail;
-        for (let key of Object.keys(projectInfo)) {
-            data[key] = projectInfo[key];
-        }
-        res.json(data);
     }
 });
 
