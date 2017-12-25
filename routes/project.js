@@ -45,13 +45,13 @@ router.get('/', (req, res, next) => {
             console.log(data); 
             let projectDetail = data.projectDetail;
             let projectInfo = data.projectInfo;
-            let data = {};
-            data.table = projectDetail;
-            for (let key of Object.keys(projectInfo)) {
-                data[key] = projectInfo[key];
-            }
-            res.json(data);
-                    });
+            //let data = {};
+            // data.table = projectDetail;
+            // for (let key of Object.keys(projectInfo)) {
+            //     data[key] = projectInfo[key];
+            // }
+            // res.json(data);
+            //         });
     }
 });
 
