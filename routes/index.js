@@ -6,7 +6,7 @@ import project from './project'
 
 
 export default app => {
-	app.use('/', home);
+	//app.use('/', home);
 	app.use('/users', users);
 	app.use('/login', login);
 	app.use('/projects', projects);
