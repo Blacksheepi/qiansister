@@ -46,12 +46,19 @@ router.get('/', (req, res, next) => {
         } else {
             let projectDetail = data.projectDetail;
             let projectInfo = data.projectInfo[0];
-            let obj = {};
-            obj.table = projectDetail;
-            for (let key of Object.keys(projectInfo)) {
-                obj[key] = projectInfo[key];
+
+            if (projectDetail && projectInfo) {
+                let obj = {};
+                obj.table = projectDetail;
+                for (let key of Object.keys(projectInfo)) {
+                   obj[key] = projectInfo[key];
+                }
+                res.json(obj);
+            } else {
+                res.status(400).json({
+                    msg: '请求的项目不存在'
+                });
             }
-            res.json(obj);
         }
         });
     }
