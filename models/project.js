@@ -17,7 +17,6 @@ export default {
 		q += unionStr;
 
 		//存入projects表项目信息
-		for ()
 		let q1 = 'INSERT INTO projects(project_name, area, position, type, tgo, tg, a, n, cop, eer, res) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
 
 		db.executeQuery(q, [], (err, data) => {
