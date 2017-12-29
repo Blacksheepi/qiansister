@@ -24,7 +24,7 @@ export default {
 				callback(err);
 				return;
 			}
-			db.executeQuery(q1, [projectDescribe.project_name, projectDescribe.area, projectDescribe.position, projectDescribe.type, projectDescribe.tgo, projectDescribe.tg, projectDescribe.a, projectDescribe.n,
+			db.executeQuery(q1, [projectDescribe.projectName, projectDescribe.area, projectDescribe.position, projectDescribe.type, projectDescribe.tgo, projectDescribe.tg, projectDescribe.a, projectDescribe.n,
 			    projectDescribe.cop, projectDescribe.eer, projectDescribe.res], (err, data) => {
 			    callback(err, data);
 		    });
