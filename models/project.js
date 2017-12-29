@@ -2,8 +2,9 @@ import db from '../lib/db'
 
 
 export default {
-	createProject (table,projectName, callback) {
-
+	createProject (table, projectName, projectDescribe, callback) {
+        
+        //存入project_detail表参数信息
 		let items = dataFormat(table, projectName);
 		let unionStr = ''
 		for (let item of items) {
@@ -14,8 +15,20 @@ export default {
 		}
 		let q = 'INSERT INTO project_detail(project_name, time, tgo, tg, a, n, cop, eer) ';
 		q += unionStr;
+
+		//存入projects表项目信息
+		for ()
+		let q1 = 'INSERT INTO projects(project_name, area, position, type, tgo, tg, a, n, cop, eer, res) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
+
 		db.executeQuery(q, [], (err, data) => {
-			callback(err, data);
+			if (err) {
+				callback(err);
+				return;
+			}
+			db.executeQuery(q1, [projectDescribe.project_name, projectDescribe.area, projectDescribe.position, projectDescribe.type, projectDescribe.tgo, projectDescribe.tg, projectDescribe.a, projectDescribe.n,
+			    projectDescribe.cop, projectDescribe.eer, projectDescribe.res], (err, data) => {
+			    callback(err, data);
+		    });
 		});
 	},
 	viewProject (projectName, callback) {
