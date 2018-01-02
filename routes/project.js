@@ -1,6 +1,7 @@
 
 import express from 'express'
 import project from '../models/project'
+import xlsx from 'xlsx'
 
 let router = express.Router();
 
@@ -10,22 +11,35 @@ router.post('/file', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
     let body = req.body;
-    let table = body.table;
     let projectName = body.projectName;
+    let area = body.area;
+    let position = body.position;
+    let type = body.type;
+    let excel = body.excel;
+
     let projectDescribe = {};
+    let excelData = {};
 
     projectDescribe.projectName = projectName;
     projectDescribe.area = '49.4';
     projectDescribe.position = '上海';
     projectDescribe.type = 's';
-    projectDescribe.tgo = 20.4;
-    projectDescribe.tg = 4.3;
-    projectDescribe.a = 0.72;
-    projectDescribe.n = 0.34;
-    projectDescribe.cop = 3.42;
-    projectDescribe.eer = 2.43;
-    projectDescribe.res = 8.88;
 
+    let workbook = xlsx.readFile(excel);
+    workbook.SheetNames.forEach((sheetName) => {
+        let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
+        if (roa.length) {
+            excelData[sheetName] = roa;
+            //console.log(result[sheetName][1]);
+            //console.log(result[sheetName]);
+            for (let i = 0; i < sheetName; i++) {
+            //  console.log(result[sheetName]);
+            }
+        }
+    });
+    excelData = excelData[workbook.SheetNames[0]];
+    console.log(excelData);
+    
     if (!table || !projectName) {
         res.status(400).json({
             msg: '请求参数错误'
