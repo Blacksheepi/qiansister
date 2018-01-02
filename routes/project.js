@@ -1,62 +1,39 @@
 
 import express from 'express'
 import project from '../models/project'
+import multer from 'multer'
 import xlsx from 'xlsx'
 
 let router = express.Router();
+let storage = multer.memoryStorage();
+let upload = multer({ 
+    storage: storage,
+    dest: 'uploads/'  
+});
 
 router.post('/file', (req, res, next) => {
     let file = req.body.file;
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('excel'), (req, res, next) => {
     let body = req.body;
     let projectName = body.projectName;
     let area = body.area;
     let position = body.position;
     let type = body.type;
-    let excel = body.excel;
-
-    let projectDescribe = {};
     let excelData = {};
-
-    projectDescribe.projectName = projectName;
-    projectDescribe.area = '49.4';
-    projectDescribe.position = '上海';
-    projectDescribe.type = 's';
-
-    let workbook = xlsx.readFile(excel);
+    
+    const fileBuffer = Buffer.from(req.file.buffer);
+    let workbook = xlsx.read(fileBuffer, {type:"buffer"});
     workbook.SheetNames.forEach((sheetName) => {
         let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
         if (roa.length) {
             excelData[sheetName] = roa;
-            //console.log(result[sheetName][1]);
-            //console.log(result[sheetName]);
-            for (let i = 0; i < sheetName; i++) {
-            //  console.log(result[sheetName]);
-            }
         }
     });
     excelData = excelData[workbook.SheetNames[0]];
-    console.log(excelData);
-    
-    if (!table || !projectName) {
-        res.status(400).json({
-            msg: '请求参数错误'
-        });
-    } else {
-        project.createProject(table, projectName, projectDescribe ,(err, data)=> {
-        if (err) {
-            res.status(500).json({
-                msg: '数据存入失败！'
-            });
-        } else {
-            res.status(201).json({
-                msg: '数据成功存入！'
-            });
-        }
-    });
-    }
+    console.log('exceldata',excelData);
+    res.json(excelData);
 });
 
 router.get('/', (req, res, next) => {

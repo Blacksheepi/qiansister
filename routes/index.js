@@ -10,5 +10,5 @@ export default app => {
 	app.use('/users', users);
 	app.use('/login', login);
 	app.use('/projects', projects);
-	app.use('/project', project)
+	app.use('/project', project);
 }
