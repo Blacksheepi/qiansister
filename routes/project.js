@@ -69,22 +69,26 @@ router.get('/projectAveParams', (req, res, next) => {
                 msg: '请求数据失败！'
             });
         } else {
-            let dataFormat = [];
-            for (let item of data) {
-                let newItem = {};
-                newItem.id = item.id;
-                newItem.tui = item.tui;
-                newItem.tuo = item.tuo;
-                newItem.tgi = item.tgi;
-                newItem.tgo = item.tgo;
-                newItem.Gu = item.gu;
-                newItem.Gg = item.gg;
-                newItem.Pl = item.pi;
-                newItem.Pu = item.pu;
-                newItem.Pg = item.pg;
-                dataFormat.push(newItem);
-            }
-            res.json(dataFormat);
+            let aveData = data;
+            projects.getProjectsInfo((err, data) => {
+                if (err) {
+                    res.status(500).json({
+                        msg: '请求数据失败！'
+                    });
+                } else {
+                    let infoData = data;
+                    for (let aveItem of aveData) {
+                        let id = aveItem.project_id;
+                        for (let infoItem of infoData) {
+                            if (infoItem.id === id) {
+                                Object.assign(aveItem, infoItem);
+                            }
+                        }
+                    }
+                    console.log(aveData);
+                    res.json(aveData);
+                }
+            });
         }
     });
 });

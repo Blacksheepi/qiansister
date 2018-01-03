@@ -7,12 +7,12 @@ export default {
     
 		let unionStr = ''
 		for (let i=0;i<data.tui.length;i++) {
-            unionStr += ` select ${data.tui[i]}, ${data.tuo[i]}, ${data.tgi[i]}, ${data.tgo[i]}, ${data.gu[i]}, ${data.gg[i]}, ${data.pi[i]}, ${data.pu[i]}, ${data.pg[i]}, ${projectId}, '${year}', ${hot} union all`
+            unionStr += ` select ${data.tui[i]}, ${data.tuo[i]}, ${data.tgi[i]}, ${data.tgo[i]}, ${data.gu[i]}, ${data.gg[i]}, ${data.pl[i]}, ${data.pu[i]}, ${data.pg[i]}, ${projectId}, '${year}', ${hot} union all`
 		}
 		if (data) {
 			unionStr = unionStr.slice(0, -9);
 		}
-		let q = 'INSERT INTO project_params(tui, tuo, tgi, tgo, gu, gg, pi, pu, pg, project_id, time, hot) ';
+		let q = 'INSERT INTO project_params(tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, project_id, time, hot) ';
 		q += unionStr;
 		console.log(q);
 

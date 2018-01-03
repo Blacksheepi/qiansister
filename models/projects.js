@@ -27,8 +27,8 @@ export default {
 		});
 	},
 	addProjectAveData (data, callback) {
-		let q = 'INSERT INTO projects_params(tui, tuo, tgi, tgo, gu, gg, pi, pu, pg, hot, project_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
-		let params = [data.tui, data.tuo, data.tgi, data.tgo, data.gu, data.gg, data.pi, data.pu, data.pg, data.hot, data.projectId];
+		let q = 'INSERT INTO projects_params(tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, hot, project_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
+		let params = [data.tui, data.tuo, data.tgi, data.tgo, data.gu, data.gg, data.pl, data.pu, data.pg, data.hot, data.projectId];
 		db.executeQuery(q, params, (err, data) => {
 			callback(err, data);
 		})

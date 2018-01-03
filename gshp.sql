@@ -46,7 +46,7 @@ CREATE TABLE project_params (
     tgo double precision NOT NULL,
     gu double precision NOT NULL,
     gg double precision NOT NULL,
-    pi double precision NOT NULL,
+    pl double precision NOT NULL,
     pu double precision NOT NULL,
     pg double precision NOT NULL,
     project_id integer NOT NULL,
@@ -129,7 +129,7 @@ CREATE TABLE projects_params (
     tgo double precision NOT NULL,
     gu double precision NOT NULL,
     gg double precision NOT NULL,
-    pi double precision NOT NULL,
+    pl double precision NOT NULL,
     pu double precision NOT NULL,
     pg double precision NOT NULL,
     hot boolean NOT NULL,
@@ -229,7 +229,7 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regcla
 -- Data for Name: project_params; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY project_params (id, tui, tuo, tgi, tgo, gu, gg, pi, pu, pg, project_id, "time", hot) FROM stdin;
+COPY project_params (id, tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, project_id, "time", hot) FROM stdin;
 9	34.5	35.3999999999999986	4.79999999999999982	5.59999999999999964	45.2000000000000028	42.5	556.200000000000045	582.600000000000023	843.399999999999977	32	Fri Jan 01 2010 00:00:00 GMT+0800 (CST)	t
 10	34.2000000000000028	35.3999999999999986	4.90000000000000036	5.29999999999999982	46.2999999999999972	41.2000000000000028	557.299999999999955	593.200000000000045	876.299999999999955	32	Fri Jan 01 2010 00:00:00 GMT+0800 (CST)	t
 11	34.6000000000000014	35.5	5.09999999999999964	4.59999999999999964	44.5	41.8999999999999986	568.200000000000045	562.200000000000045	876.200000000000045	32	Fri Jan 01 2010 00:00:00 GMT+0800 (CST)	t
@@ -308,7 +308,7 @@ COPY projects (id, area, "position", type, begin_time, project_name) FROM stdin;
 -- Data for Name: projects_params; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY projects_params (id, tui, tuo, tgi, tgo, gu, gg, pi, pu, pg, hot, project_id) FROM stdin;
+COPY projects_params (id, tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, hot, project_id) FROM stdin;
 19	34.4333333333333371	35.43333333333333	4.93333333333333268	5.16666666666666607	45.3333333333333357	41.8666666666666671	560.56666666666672	579.333333333333371	865.299999999999841	t	32
 20	32.4333333333333371	31.0999999999999979	2.93333333333333313	3.5	42.3333333333333357	45.5333333333333314	533.899999999999977	519.333333333333371	798.633333333333212	f	32
 21	34.4333333333333371	35.43333333333333	4.93333333333333268	5.16666666666666607	45.3333333333333357	41.8666666666666671	560.56666666666672	579.333333333333371	865.299999999999841	t	33
