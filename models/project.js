@@ -42,7 +42,13 @@ export default {
 	getProjectInfo (id, callback) {
 		let q = 'SELECT * FROM projects WHERE id = ' + id;
 		db.executeQuery(q, [], (err, data) => {
-			callback(err, data[0]);
+			if (data) {
+				callback(err, data[0]);
+			} else {
+				err = {
+					msg: '请求的项目不存在！'
+				};
+			}
 		});
 	}
 }
