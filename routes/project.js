@@ -4,6 +4,7 @@ import project from '../models/project'
 import projects from '../models/projects'
 import multer from 'multer'
 import xlsx from 'xlsx'
+import logger from '../lib/logger'
 
 let router = express.Router();
 let storage = multer.memoryStorage();
@@ -36,6 +37,7 @@ router.post('/', upload.fields(fields), (req, res, next) => {
     
     projects.addProject(projectInfo, (err, data) => {
         if (err) {
+            logger.err(err);
             res.status(500).json({
                 msg: '存入数据库失败！'
             });
@@ -65,6 +67,7 @@ router.get('/projectAveParams', (req, res, next) => {
     }
     projects.getProjectsParams(hot, (err, data) => {
         if (err) {
+            logger.err(err);
             res.status(500).json({
                 msg: '请求数据失败！'
             });
@@ -72,6 +75,7 @@ router.get('/projectAveParams', (req, res, next) => {
             let aveData = data;
             projects.getProjectsInfo((err, data) => {
                 if (err) {
+                    logger.err(err);
                     res.status(500).json({
                         msg: '请求数据失败！'
                     });
@@ -85,7 +89,6 @@ router.get('/projectAveParams', (req, res, next) => {
                             }
                         }
                     }
-                    console.log(aveData);
                     res.json(aveData);
                 }
             });
@@ -147,19 +150,18 @@ function saveData (data, projectId, hot, year) {
     aveData.projectId = projectId;
     aveData.hot = hot;
     projects.addProjectAveData(aveData, (err, data) => {
-        console.log(err);
+        logger.err(err);
     });
     let dbFormatData = {};
     for (let item of originData) {
         dbFormatData[item[0]] = item[1];
     }
     project.createProject(dbFormatData, projectId, year, hot, (err, data) => {
-        console.log(err);
+        logger.err(err);
     });
 }
 
 function processFile(file) {
-    console.log(3333)
     let excelData = {};
     let workbook = xlsx.read(file, {type:"buffer"});
     workbook.SheetNames.forEach((sheetName) => {
@@ -189,7 +191,6 @@ function processFile(file) {
 }
 
 function dataFormat(table) {
-    console.log(444)
     let columnName = table[0];
     let res = [];
     for (let i=0;i<columnName.length;i++) {
