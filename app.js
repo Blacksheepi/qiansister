@@ -5,6 +5,7 @@ import logger from 'morgan'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import session from 'express-session'
+import compression from 'compression'
 
 import index from './routes/index'
 import users from './routes/users'
@@ -24,6 +25,8 @@ app.all('*', (req, res, next) => {
         next();
     }
 });
+
+app.use(compression());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
