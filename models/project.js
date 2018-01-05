@@ -14,7 +14,6 @@ export default {
 		}
 		let q = 'INSERT INTO project_params(tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, project_id, time, hot) ';
 		q += unionStr;
-		console.log(q);
 
 		db.executeQuery(q, [], (err, data) => {
 			callback(err, data);
@@ -34,7 +33,6 @@ export default {
 		    	let projectInfo = data;
 		    	res.projectInfo = projectInfo;
 		    	res.projectDetail = projectDetail;
-		    	console.log('model res', res);
 			    callback(err, res);
 		    });
 		});
