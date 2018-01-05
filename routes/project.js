@@ -37,7 +37,12 @@ router.post('/', upload.fields(fields), (req, res, next) => {
     
     projects.addProject(projectInfo, (err, data) => {
         if (err) {
-            logger.err(err);
+            logger.err({
+                type: 'db',
+                action: 'insert',
+                info: 'save projects table failed!',
+                req: req.body,
+            }, err);
             res.status(500).json({
                 msg: '存入数据库失败！'
             });
@@ -55,8 +60,11 @@ router.post('/', upload.fields(fields), (req, res, next) => {
                 let coldData = processFile(coldFile);
                 saveData(coldData, id, false, coldYear);
             }
-                }
+            res.json({
+                id: id
             });
+        }
+    });
 });
 
 router.get('/projectAveParams', (req, res, next) => {
@@ -67,7 +75,14 @@ router.get('/projectAveParams', (req, res, next) => {
     }
     projects.getProjectsParams(hot, (err, data) => {
         if (err) {
-            logger.err(err);
+
+            logger.err({
+                type: 'db',
+                action: 'query',
+                info: 'query projects_params table failed!',
+                req: req.query,
+            }, err);
+
             res.status(500).json({
                 msg: '请求数据失败！'
             });
@@ -75,10 +90,18 @@ router.get('/projectAveParams', (req, res, next) => {
             let aveData = data;
             projects.getProjectsInfo((err, data) => {
                 if (err) {
-                    logger.err(err);
+
+                    logger.err({
+                        type: 'db',
+                        action: 'query',
+                        info: 'query projects table failed!',
+                        req: req.query,
+                    }, err);
+
                     res.status(500).json({
                         msg: '请求数据失败！'
                     });
+
                 } else {
                     let infoData = data;
                     for (let aveItem of aveData) {
@@ -100,6 +123,14 @@ router.get('/projectInfo', (req, res, next) => {
     let id = req.query.id;
     project.getProjectInfo(id, (err, data) => {
         if (err) {
+
+            logger.err({
+                type: 'db',
+                action: 'query',
+                info: 'query projects table use id failed!',
+                req: req.query,
+            }, err);
+
             res.status(500).json({
                 msg: '请求数据失败！'
             });
@@ -150,14 +181,26 @@ function saveData (data, projectId, hot, year) {
     aveData.projectId = projectId;
     aveData.hot = hot;
     projects.addProjectAveData(aveData, (err, data) => {
-        logger.err(err);
+        if (err) {
+            logger.err({
+                type: 'db',
+                action: 'insert',
+                info: 'save projects_params table failed!'
+            }, err);
+        }
     });
     let dbFormatData = {};
     for (let item of originData) {
         dbFormatData[item[0]] = item[1];
     }
     project.createProject(dbFormatData, projectId, year, hot, (err, data) => {
-        logger.err(err);
+        if (err) {
+            logger.err({
+                type: 'db',
+                action: 'insert',
+                info: 'save project_params table failed!'
+            }, err);
+        }
     });
 }
 

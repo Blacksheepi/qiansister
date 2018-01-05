@@ -1,1 +1,4 @@
 node_modules
+error.log
+combined.log
+exceptions.log
