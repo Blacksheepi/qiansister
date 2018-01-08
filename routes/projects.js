@@ -5,17 +5,15 @@ import logger from '../lib/logger'
 
 let router = express.Router();
 
-router.get('/', (req, res, next) => {
-    projects.getProjectsInfo((err, data) => {
-    	if (err) {
-    		logger.err(err);
-    		res.status(500).json({
-    			msg: '请求数据失败！'
-    		});
-    	} else {
-            res.json(data);
-    	}
-    });
+router.get('/', async (req, res, next) => {
+    try {
+        let data = await projects.getProjectsInfo();
+        res.json(data);
+    } catch (err) {
+        logger.err({
+            info: 'getProjects failed!'
+        }, err)
+    }
 });
 
 export default router;

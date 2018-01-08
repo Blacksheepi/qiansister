@@ -17,7 +17,8 @@ let fields = [
     {name: 'coldFile', maxCount: 1}
 ];
 
-router.post('/', upload.fields(fields), (req, res, next) => {
+router.post('/', upload.fields(fields), async (req, res, next) => {
+
     let body = req.body;
     let projectName = body.projectName;
     let area = body.area;
@@ -34,113 +35,161 @@ router.post('/', upload.fields(fields), (req, res, next) => {
     projectInfo.position = position;
     projectInfo.type = type;
     projectInfo.beginTime = beginTime;
-    
-    projects.addProject(projectInfo, (err, data) => {
-        if (err) {
-            logger.err({
-                type: 'db',
-                action: 'insert',
-                info: 'save projects table failed!',
-                req: req.body,
-            }, err);
-            res.status(500).json({
-                msg: '存入数据库失败！'
-            });
-        } else {
-            id = data;
-            let files = req.files;
-            if (files.hotFile) {
-                let hotFile = files.hotFile[0].buffer;
-                let hotData = processFile(hotFile);
-                saveData(hotData, id, true, hotYear);
 
-            }
-            if (files.coldFile) {
-                let coldFile = files.coldFile[0].buffer;
-                let coldData = processFile(coldFile);
-                saveData(coldData, id, false, coldYear);
-            }
-            res.json({
-                id: id
-            });
+    try {
+        let idData = await projects.addProject(projectInfo)
+        id = idData[0].max;
+        let files = req.files;
+        if (files.hotFile) {
+            let hotFile = files.hotFile[0].buffer;
+            let hotData = processFile(hotFile);
+            saveData(hotData, id, true, hotYear);    
+
         }
-    });
+        if (files.coldFile) {
+            let coldFile = files.coldFile[0].buffer;
+            let coldData = processFile(coldFile);
+            saveData(coldData, id, false, coldYear);
+        }
+        res.json({
+            id: id
+        });
+    } catch (err) {
+        logger.err({
+            info: 'addProject failed!',
+            req: req.body
+        }, err);
+        res.status(500).json({
+            msg: '存入数据库失败！'
+        });
+    }
 });
 
-router.get('/projectAveParams', (req, res, next) => {
+router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
+    let body = req.body;
+    let projectName = body.projectName;
+    let area = body.area;
+    let position = body.position;
+    let type = body.type;
+    let beginTime = body.beginTime;
+    let hotYear = body.hotYear;
+    let coldYear = body.coldYear;
+    let id = body.id;
+
+    let projectInfo = {};
+    projectInfo.project_name = projectName;
+    projectInfo.area = area;
+    projectInfo.position = position;
+    projectInfo.type = type;
+    projectInfo.begin_time = beginTime;
+
+    try {
+        await project.updateProjectInfo(projectInfo, id)
+
+        let files = req.files;
+        if (files.hotFile) {
+            let hotFile = files.hotFile[0].buffer;
+            let hotData = processFile(hotFile);
+            let oldProjectAveData = await projects.getProjectAveData(true, id);
+            if (oldProjectAveData[0]) {
+                let newProjectAveData = {};
+                for (let oldItem of Object.keys(oldProjectAveData[0])) {
+                    for (let addItem of Object.keys(hotData.aveData)) {
+                        if (addItem === oldItem) {
+                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
+                        }
+                    }
+                }
+                newProjectAveData.id = oldProjectAveData[0].id;
+                hotData.aveData = newProjectAveData;
+                saveData(hotData, id, true, hotYear, true);
+            } else {
+                saveData(hotData, id, true, hotYear, false);
+            }
+        }
+        if (files.coldFile) {
+            let coldFile = files.coldFile[0].buffer;
+            let coldData = processFile(coldFile);
+            let oldProjectAveData = await projects.getProjectAveData(false, id);
+            if (oldProjectAveData[0]) {
+                let newProjectAveData = {};
+                for (let oldItem of Object.keys(oldProjectAveData[0])) {
+                    for (let addItem of Object.keys(coldData.aveData)) {
+                        if (addItem === oldItem) {
+                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
+                        }
+                    }
+                }
+                newProjectAveData.id = oldProjectAveData[0].id;
+                coldData.aveData = newProjectAveData;
+                saveData(coldData, id, false, coldYear, true);
+            } else {
+                saveData(coldData, id, false, coldYear, false);
+            }
+        }
+        res.json({
+            id: id
+        });
+
+    } catch (err) {
+        logger.err({
+            info: 'updateProject failed!',
+            req: req.body
+        }, err);
+        res.status(500).json({
+            msg: '存入数据库失败！'
+        })
+    }
+})
+
+router.get('/projectAveParams', async (req, res, next) => {
     let season = req.query.season;
     let hot = true;
     if (season == 1) {
         hot = false;
     }
-    projects.getProjectsParams(hot, (err, data) => {
-        if (err) {
+    try {
+        let aveData = await projects.getProjectsParams(hot);
+        let infoData = await projects.getProjectsInfo();    
 
-            logger.err({
-                type: 'db',
-                action: 'query',
-                info: 'query projects_params table failed!',
-                req: req.query,
-            }, err);
-
-            res.status(500).json({
-                msg: '请求数据失败！'
-            });
-        } else {
-            let aveData = data;
-            projects.getProjectsInfo((err, data) => {
-                if (err) {
-
-                    logger.err({
-                        type: 'db',
-                        action: 'query',
-                        info: 'query projects table failed!',
-                        req: req.query,
-                    }, err);
-
-                    res.status(500).json({
-                        msg: '请求数据失败！'
-                    });
-
-                } else {
-                    let infoData = data;
-                    for (let aveItem of aveData) {
-                        let id = aveItem.project_id;
-                        for (let infoItem of infoData) {
-                            if (infoItem.id === id) {
-                                Object.assign(aveItem, infoItem);
-                            }
-                        }
-                    }
-                    res.json(aveData);
+        for (let aveItem of aveData) {
+            let id = aveItem.project_id;
+            for (let infoItem of infoData) {
+                if (infoItem.id === id) {
+                    Object.assign(aveItem, infoItem);
                 }
-            });
+            }
         }
-    });
+        res.json(aveData);
+    } catch (err) {
+        logger.err({
+            info: 'getProjectAveParams failed!',
+            req: req.qruey
+        }, err);
+        res.status(500).json({
+            msg: '获取数据失败！'
+        })
+    }
 });
 
-router.get('/projectInfo', (req, res, next) => {
+router.get('/projectInfo', async (req, res, next) => {
     let id = req.query.id;
-    project.getProjectInfo(id, (err, data) => {
-        if (err) {
 
-            logger.err({
-                type: 'db',
-                action: 'query',
-                info: 'query projects table use id failed!',
-                req: req.query,
-            }, err);
-
-            res.status(500).json({
-                msg: '请求数据失败！'
-            });
-        } else {
-            res.json(data);
-        }
-    });
+    try {
+        let data = await project.getProjectInfo(id);
+        res.json(data);
+    } catch (err) {
+        logger.err({
+            info: 'getProjectInfo failed!',
+            req: req.qruey
+        }, err);
+        res.status(500).json({
+            msg: '获取数据失败！'
+        })
+    }
 });
 
-router.get('/projectAllParams', (req, res, next) => {
+router.get('/projectAllParams', async (req, res, next) => {
     let id = req.query.id;
     if (!id) {
         res.status(400).json({
@@ -148,60 +197,44 @@ router.get('/projectAllParams', (req, res, next) => {
         });
     } else {
 
-        project.viewProject(id, (err, data) => {
-            
-            if (err) {
-                res.status(500).json({
-                    msg: 'something wrong when fetch data.'
-                });
-            } else {
-                let projectDetail = data.projectDetail;
-                let projectInfo = data.projectInfo[0];    
-
-                if (projectDetail && projectInfo) {
-                    let obj = {};
-                    obj.table = projectDetail;
-                    for (let key of Object.keys(projectInfo)) {
-                       obj[key] = projectInfo[key];
-                    }
-                    res.json(obj);
-                } else {
-                    res.status(400).json({
-                        msg: '请求的项目不存在'
-                    });
+        try {
+            let projectParams = await project.getProjectParams(id);
+            let projectInfo = await project.getProjectInfo(id); 
+            if (projectParams && projectInfo[0]) {
+                let obj = {};
+                obj.table = projectParams;
+                for (let key of Object.keys(projectInfo[0])) {
+                    obj[key] = projectInfo[0][key];
                 }
+                res.json(obj);
             }
-        });
+        } catch (err) {
+            logger.err({
+                info: 'getProjectALLParams failed!',
+                req: req.qruey
+            }, err);
+            res.status(500).json({
+                msg: '获取数据失败！'
+            })
+        }
     }
 });
 
-function saveData (data, projectId, hot, year) {
+function saveData (data, projectId, hot, year, update) {
     let originData = data.originData;
     let aveData = data.aveData;
-    aveData.projectId = projectId;
+    aveData.project_id = projectId;
     aveData.hot = hot;
-    projects.addProjectAveData(aveData, (err, data) => {
-        if (err) {
-            logger.err({
-                type: 'db',
-                action: 'insert',
-                info: 'save projects_params table failed!'
-            }, err);
-        }
-    });
+    if (update) {
+        projects.updateProjectAveData(aveData, aveData.id);
+    } else {
+        projects.saveProjectAveData(aveData);
+    }
     let dbFormatData = {};
     for (let item of originData) {
         dbFormatData[item[0]] = item[1];
     }
-    project.createProject(dbFormatData, projectId, year, hot, (err, data) => {
-        if (err) {
-            logger.err({
-                type: 'db',
-                action: 'insert',
-                info: 'save project_params table failed!'
-            }, err);
-        }
-    });
+    project.saveProjectParams(dbFormatData, projectId, year, hot);
 }
 
 function processFile(file) {
@@ -214,7 +247,17 @@ function processFile(file) {
         }
     });
     excelData = excelData[workbook.SheetNames[0]];
+    let tempExeclData = [];
+    for (let item of excelData) {
+        if (item.length > 0) {
+            tempExeclData.push(item);
+        }
+    }
+    excelData = tempExeclData;
+    console.log('222222', excelData);
     excelData = dataFormat(excelData);
+
+    console.log('execlDataaaaaaaaaaaa', excelData);
     
     let aveData = {};
     let len = excelData[0][1].length;
@@ -252,7 +295,7 @@ function dataFormat(table) {
         } else if (/地源侧流量/.test(name)) {
             item.push('gg');
         } else if (/机组总耗电/.test(name)) {
-            item.push('pi');
+            item.push('pl');
         } else if (/用户侧水泵总耗电/.test(name)) {
             item.push('pu');
         } else if (/地源侧水泵总耗电/.test(name)) {

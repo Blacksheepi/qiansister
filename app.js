@@ -9,7 +9,8 @@ import compression from 'compression'
 
 import index from './routes/index'
 import users from './routes/users'
-import router from './routes/index';
+import router from './routes/index'
+import config from './configs/global/config'
 
 let app = express();
 
@@ -39,6 +40,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// app.use(session({
+//    name: config.session.name,
+//    secret: config.session.secret,
+//    resave: true,
+//    saveUninitialized: false,
+//    cookie: config.session.cookie,
+// }));
 
 router(app);
 

@@ -2,7 +2,7 @@ import db from '../lib/db'
 
 
 export default {
-	createProject (data, projectId, year, hot, callback) {
+	saveProjectParams (data, projectId, year, hot) {
         
     
 		let unionStr = ''
@@ -15,38 +15,19 @@ export default {
 		let q = 'INSERT INTO project_params(tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, project_id, time, hot) ';
 		q += unionStr;
 
-		db.executeQuery(q, [], (err, data) => {
-			callback(err, data);
-		});
+		return db.executeQuery(q, []);
 	},
-	viewProject (id, callback) {
+	updateProjectInfo (projectInfo, id) {
+        return db.updateFields('projects', 'id', id, projectInfo);
+	},
+	getProjectParams (id) {
 
 		let q1 = `SELECT * FROM project_params WHERE project_id = '${id}'`;
 		let res = {};
-		db.executeQuery(q1, [], (err, data) => {
-			if (err) {
-				callback(err);
-			}
-			let projectDetail = data;
-			let q2 = `SELECT * FROM projects WHERE id = '${id}'`;
-		    db.executeQuery(q2, [], (err, data) => {
-		    	let projectInfo = data;
-		    	res.projectInfo = projectInfo;
-		    	res.projectDetail = projectDetail;
-			    callback(err, res);
-		    });
-		});
+		return db.executeQuery(q1, []);
 	},
-	getProjectInfo (id, callback) {
+	getProjectInfo (id) {
 		let q = 'SELECT * FROM projects WHERE id = ' + id;
-		db.executeQuery(q, [], (err, data) => {
-			if (data) {
-				callback(err, data[0]);
-			} else {
-				err = {
-					msg: '请求的项目不存在！'
-				};
-			}
-		});
+		return db.executeQuery(q, []);
 	}
 }

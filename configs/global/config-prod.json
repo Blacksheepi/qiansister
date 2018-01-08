@@ -5,5 +5,14 @@
         "database": "gshp",
         "user": "postgres",
         "password": "qiansister"
+    },
+    "session": {
+    	"name": "SID",
+		"secret": "SID",
+		"cookie": {
+			"httpOnly": true,
+		    "secure":   false,
+		    "maxAge":   3600000
+		}
     }
 }
