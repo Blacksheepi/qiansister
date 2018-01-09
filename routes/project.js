@@ -35,34 +35,62 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
     projectInfo.position = position;
     projectInfo.type = type;
     projectInfo.beginTime = beginTime;
+    
+    let files = req.files;
 
-    try {
-        let idData = await projects.addProject(projectInfo)
-        id = idData[0].max;
-        let files = req.files;
-        if (files.hotFile) {
-            let hotFile = files.hotFile[0].buffer;
-            let hotData = processFile(hotFile);
-            saveData(hotData, id, true, hotYear);    
+    if (files.hotFile) {
 
+        let hotFile = files.hotFile[0].buffer;
+        let hotData = processFile(hotFile);
+        //saveData(hotData, id, true, hotYear);
+        let originData = hotData.originData;
+        let aveData = hotData.aveData; 
+        aveData.hot = true;
+        //projects.saveProjectAveData(aveData);
+        let dbFormatData = {};
+        for (let item of originData) {
+            dbFormatData[item[0]] = item[1];
+        };
+        //project.saveProjectParams(dbFormatData, projectId, year, hot);
+        try {
+            let id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true);    
+        } catch (err) {
+            logger.err({
+                info: 'addProject failed!',
+                req: req.body
+            }, err);
+            res.status(500).json({
+                msg: '存入数据库失败！'
+            });
+            throw err;
         }
-        if (files.coldFile) {
-            let coldFile = files.coldFile[0].buffer;
-            let coldData = processFile(coldFile);
-            saveData(coldData, id, false, coldYear);
-        }
-        res.json({
-            id: id
-        });
-    } catch (err) {
-        logger.err({
-            info: 'addProject failed!',
-            req: req.body
-        }, err);
-        res.status(500).json({
-            msg: '存入数据库失败！'
-        });
     }
+    if (files.coldFile) {
+        let coldFile = files.coldFile[0].buffer;
+        let coldData = processFile(coldFile);
+        let originData = coldData.originData;
+        let aveData = coldData.aveData;
+        aveData.hot = false;
+        let dbFormatData = {};
+        for (let item of originData) {
+            dbFormatData[item[0]] = item[1];
+        };
+        try {
+            let id = await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false);    
+        } catch (err) {
+            logger.err({
+                info: 'addProject failed!',
+                req: req.body
+            }, err);
+            res.status(500).json({
+                msg: '存入数据库失败！'
+            });
+            throw err;
+        }
+    }
+    res.json({
+        id: id
+    });
 });
 
 router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
@@ -83,63 +111,155 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     projectInfo.type = type;
     projectInfo.begin_time = beginTime;
 
-    try {
-        await project.updateProjectInfo(projectInfo, id)
+    let files = req.files;
 
-        let files = req.files;
-        if (files.hotFile) {
-            let hotFile = files.hotFile[0].buffer;
-            let hotData = processFile(hotFile);
-            let oldProjectAveData = await projects.getProjectAveData(true, id);
-            if (oldProjectAveData[0]) {
-                let newProjectAveData = {};
-                for (let oldItem of Object.keys(oldProjectAveData[0])) {
-                    for (let addItem of Object.keys(hotData.aveData)) {
-                        if (addItem === oldItem) {
-                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
-                        }
+    if (files.hotFile) {
+        let hasAveData = false;
+        let hotFile = files.hotFile[0].buffer;
+        let hotData = processFile(hotFile);
+        //saveData(hotData, id, true, hotYear);
+        let oldProjectAveData = await projects.getProjectAveData(true, id);
+        console.log('oldProjectAveData',oldProjectAveData)
+        if (oldProjectAveData[0]) {
+
+            hasAveData = true;
+            let newProjectAveData = {};
+            for (let oldItem of Object.keys(oldProjectAveData[0])) {
+                for (let addItem of Object.keys(hotData.aveData)) {
+                    if (addItem === oldItem) {
+                        newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
                     }
                 }
-                newProjectAveData.id = oldProjectAveData[0].id;
-                hotData.aveData = newProjectAveData;
-                saveData(hotData, id, true, hotYear, true);
-            } else {
-                saveData(hotData, id, true, hotYear, false);
             }
+            newProjectAveData.id = oldProjectAveData[0].id;
+            hotData.aveData = newProjectAveData;
         }
-        if (files.coldFile) {
-            let coldFile = files.coldFile[0].buffer;
-            let coldData = processFile(coldFile);
-            let oldProjectAveData = await projects.getProjectAveData(false, id);
-            if (oldProjectAveData[0]) {
-                let newProjectAveData = {};
-                for (let oldItem of Object.keys(oldProjectAveData[0])) {
-                    for (let addItem of Object.keys(coldData.aveData)) {
-                        if (addItem === oldItem) {
-                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
-                        }
-                    }
-                }
-                newProjectAveData.id = oldProjectAveData[0].id;
-                coldData.aveData = newProjectAveData;
-                saveData(coldData, id, false, coldYear, true);
-            } else {
-                saveData(coldData, id, false, coldYear, false);
-            }
+        let originData = hotData.originData;
+        let aveData = hotData.aveData; 
+        aveData.hot = true;
+        //projects.saveProjectAveData(aveData);
+        let dbFormatData = {};
+        for (let item of originData) {
+            dbFormatData[item[0]] = item[1];
+        };
+        //project.saveProjectParams(dbFormatData, projectId, year, hot);
+        try {
+            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, true, id, hasAveData);    
+        } catch (err) {
+            logger.err({
+                info: 'addProject failed!',
+                req: req.body
+            }, err);
+            res.status(500).json({
+                msg: '存入数据库失败！'
+            });
+            throw err;
         }
-        res.json({
-            id: id
-        });
-
-    } catch (err) {
-        logger.err({
-            info: 'updateProject failed!',
-            req: req.body
-        }, err);
-        res.status(500).json({
-            msg: '存入数据库失败！'
-        })
     }
+    if (files.coldFile) {
+        let hasAveData = false;
+        let coldFile = files.coldFile[0].buffer;
+        let coldData = processFile(coldFile);
+        //saveData(hotData, id, true, hotYear);
+        let oldProjectAveData = await projects.getProjectAveData(true, id);
+        console.log('oldProjectAveData',oldProjectAveData)
+        if (oldProjectAveData[0]) {
+
+            hasAveData = true;
+            let newProjectAveData = {};
+            for (let oldItem of Object.keys(oldProjectAveData[0])) {
+                for (let addItem of Object.keys(coldData.aveData)) {
+                    if (addItem === oldItem) {
+                        newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
+                    }
+                }
+            }
+            newProjectAveData.id = oldProjectAveData[0].id;
+            coldData.aveData = newProjectAveData;
+        }
+        let originData = coldData.originData;
+        let aveData = coldData.aveData; 
+        aveData.hot = false;
+        //projects.saveProjectAveData(aveData);
+        let dbFormatData = {};
+        for (let item of originData) {
+            dbFormatData[item[0]] = item[1];
+        };
+        //project.saveProjectParams(dbFormatData, projectId, year, hot);
+        try {
+            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, false, id, hasAveData);    
+        } catch (err) {
+            logger.err({
+                info: 'addProject failed!',
+                req: req.body
+            }, err);
+            res.status(500).json({
+                msg: '存入数据库失败！'
+            });
+            throw err;
+        }
+    }
+    res.json({
+        id: id
+    });
+
+    // try {
+    //     await project.updateProjectInfo(projectInfo, id)
+
+    //     let files = req.files;
+    //     if (files.hotFile) {
+    //         let hotFile = files.hotFile[0].buffer;
+    //         let hotData = processFile(hotFile);
+    //         let oldProjectAveData = await projects.getProjectAveData(true, id);
+    //         if (oldProjectAveData[0]) {
+    //             let newProjectAveData = {};
+    //             for (let oldItem of Object.keys(oldProjectAveData[0])) {
+    //                 for (let addItem of Object.keys(hotData.aveData)) {
+    //                     if (addItem === oldItem) {
+    //                         newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
+    //                     }
+    //                 }
+    //             }
+    //             newProjectAveData.id = oldProjectAveData[0].id;
+    //             hotData.aveData = newProjectAveData;
+    //             saveData(hotData, id, true, hotYear, true);
+    //         } else {
+    //             saveData(hotData, id, true, hotYear, false);
+    //         }
+    //     }
+    //     if (files.coldFile) {
+    //         let coldFile = files.coldFile[0].buffer;
+    //         let coldData = processFile(coldFile);
+    //         let oldProjectAveData = await projects.getProjectAveData(false, id);
+    //         if (oldProjectAveData[0]) {
+    //             let newProjectAveData = {};
+    //             for (let oldItem of Object.keys(oldProjectAveData[0])) {
+    //                 for (let addItem of Object.keys(coldData.aveData)) {
+    //                     if (addItem === oldItem) {
+    //                         newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
+    //                     }
+    //                 }
+    //             }
+    //             newProjectAveData.id = oldProjectAveData[0].id;
+    //             coldData.aveData = newProjectAveData;
+    //             saveData(coldData, id, false, coldYear, true);
+    //         } else {
+    //             saveData(coldData, id, false, coldYear, false);
+    //         }
+    //     }
+    //     res.json({
+    //         id: id
+    //     });
+
+    // } catch (err) {
+    //     logger.err({
+    //         info: 'updateProject failed!',
+    //         req: req.body
+    //     }, err);
+    //     res.status(500).json({
+    //         msg: '存入数据库失败！'
+    //     })
+    // }
 })
 
 router.get('/projectAveParams', async (req, res, next) => {
@@ -177,7 +297,7 @@ router.get('/projectInfo', async (req, res, next) => {
 
     try {
         let data = await project.getProjectInfo(id);
-        res.json(data);
+        res.json(data[0]);
     } catch (err) {
         logger.err({
             info: 'getProjectInfo failed!',
@@ -254,11 +374,7 @@ function processFile(file) {
         }
     }
     excelData = tempExeclData;
-    console.log('222222', excelData);
-    excelData = dataFormat(excelData);
-
-    console.log('execlDataaaaaaaaaaaa', excelData);
-    
+    excelData = dataFormat(excelData);    
     let aveData = {};
     let len = excelData[0][1].length;
     for (let item of excelData) {

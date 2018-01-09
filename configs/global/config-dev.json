@@ -5,5 +5,14 @@
         "database": "test_db",
         "user": "test",
         "password": "123456"
+    },
+    "session": {
+    	"name": "SID",
+		"secret": "SID",
+		"cookie": {
+			"httpOnly": true,
+		    "secure":   false,
+		    "maxAge":   3600000
+		}
     }
 }
