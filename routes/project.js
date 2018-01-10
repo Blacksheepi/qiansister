@@ -21,7 +21,7 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
 
     let body = req.body;
     let projectName = body.projectName;
-    let area = body.area;
+    let area = body.area ? parseFloat(body.area) : null;
     let position = body.position;
     let type = body.type;
     let beginTime = body.beginTime;
@@ -35,6 +35,7 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
     projectInfo.position = position;
     projectInfo.type = type;
     projectInfo.beginTime = beginTime;
+    console.log('reqBody', projectInfo);
     
     let files = req.files;
 
@@ -53,7 +54,10 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         };
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
-            let id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true);    
+            let id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true);  
+            res.json({
+                id: id
+            });   
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -76,7 +80,10 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             dbFormatData[item[0]] = item[1];
         };
         try {
-            let id = await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false);    
+            let id = await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false);
+            res.json({
+                id: id
+            });    
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -88,15 +95,12 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
-    res.json({
-        id: id
-    });
 });
 
 router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     let body = req.body;
     let projectName = body.projectName;
-    let area = body.area;
+    let area = body.area ? parseFloat(body.area) : null;
     let position = body.position;
     let type = body.type;
     let beginTime = body.beginTime;
@@ -121,13 +125,18 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         let oldProjectAveData = await projects.getProjectAveData(true, id);
         console.log('oldProjectAveData',oldProjectAveData)
         if (oldProjectAveData[0]) {
-
             hasAveData = true;
             let newProjectAveData = {};
             for (let oldItem of Object.keys(oldProjectAveData[0])) {
                 for (let addItem of Object.keys(hotData.aveData)) {
                     if (addItem === oldItem) {
-                        newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
+                        if (oldProjectAveData[0][oldItem] && hotData.aveData[addItem]) {
+                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2;
+                        } else if (!oldProjectAveData[0][oldItem] && !hotData.aveData[addItem]) {
+                            newProjectAveData[addItem] = null;
+                        } else {
+                            newProjectAveData[addItem] = oldProjectAveData[0][oldItem] ? oldProjectAveData[0][oldItem] : hotData.aveData[addItem];
+                        }
                     }
                 }
             }
@@ -136,6 +145,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         }
         let originData = hotData.originData;
         let aveData = hotData.aveData; 
+        console.log('aveDataaaaaaa', aveData);
         aveData.hot = true;
         //projects.saveProjectAveData(aveData);
         let dbFormatData = {};
@@ -164,13 +174,18 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         let oldProjectAveData = await projects.getProjectAveData(true, id);
         console.log('oldProjectAveData',oldProjectAveData)
         if (oldProjectAveData[0]) {
-
             hasAveData = true;
             let newProjectAveData = {};
             for (let oldItem of Object.keys(oldProjectAveData[0])) {
                 for (let addItem of Object.keys(coldData.aveData)) {
                     if (addItem === oldItem) {
-                        newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
+                        if (oldProjectAveData[0][oldItem] && coldData.aveData[addItem]) {
+                            newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2;
+                        } else if (!oldProjectAveData[0][oldItem] && !coldData.aveData[addItem]) {
+                            newProjectAveData[addItem] = null;
+                        } else {
+                            newProjectAveData[addItem] = oldProjectAveData[0][oldItem] ? oldProjectAveData[0][oldItem] : coldData.aveData[addItem];
+                        }
                     }
                 }
             }
@@ -202,64 +217,6 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     res.json({
         id: id
     });
-
-    // try {
-    //     await project.updateProjectInfo(projectInfo, id)
-
-    //     let files = req.files;
-    //     if (files.hotFile) {
-    //         let hotFile = files.hotFile[0].buffer;
-    //         let hotData = processFile(hotFile);
-    //         let oldProjectAveData = await projects.getProjectAveData(true, id);
-    //         if (oldProjectAveData[0]) {
-    //             let newProjectAveData = {};
-    //             for (let oldItem of Object.keys(oldProjectAveData[0])) {
-    //                 for (let addItem of Object.keys(hotData.aveData)) {
-    //                     if (addItem === oldItem) {
-    //                         newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + hotData.aveData[addItem])/2
-    //                     }
-    //                 }
-    //             }
-    //             newProjectAveData.id = oldProjectAveData[0].id;
-    //             hotData.aveData = newProjectAveData;
-    //             saveData(hotData, id, true, hotYear, true);
-    //         } else {
-    //             saveData(hotData, id, true, hotYear, false);
-    //         }
-    //     }
-    //     if (files.coldFile) {
-    //         let coldFile = files.coldFile[0].buffer;
-    //         let coldData = processFile(coldFile);
-    //         let oldProjectAveData = await projects.getProjectAveData(false, id);
-    //         if (oldProjectAveData[0]) {
-    //             let newProjectAveData = {};
-    //             for (let oldItem of Object.keys(oldProjectAveData[0])) {
-    //                 for (let addItem of Object.keys(coldData.aveData)) {
-    //                     if (addItem === oldItem) {
-    //                         newProjectAveData[addItem] = (oldProjectAveData[0][oldItem] + coldData.aveData[addItem])/2
-    //                     }
-    //                 }
-    //             }
-    //             newProjectAveData.id = oldProjectAveData[0].id;
-    //             coldData.aveData = newProjectAveData;
-    //             saveData(coldData, id, false, coldYear, true);
-    //         } else {
-    //             saveData(coldData, id, false, coldYear, false);
-    //         }
-    //     }
-    //     res.json({
-    //         id: id
-    //     });
-
-    // } catch (err) {
-    //     logger.err({
-    //         info: 'updateProject failed!',
-    //         req: req.body
-    //     }, err);
-    //     res.status(500).json({
-    //         msg: '存入数据库失败！'
-    //     })
-    // }
 })
 
 router.get('/projectAveParams', async (req, res, next) => {
@@ -340,23 +297,6 @@ router.get('/projectAllParams', async (req, res, next) => {
     }
 });
 
-function saveData (data, projectId, hot, year, update) {
-    let originData = data.originData;
-    let aveData = data.aveData;
-    aveData.project_id = projectId;
-    aveData.hot = hot;
-    if (update) {
-        projects.updateProjectAveData(aveData, aveData.id);
-    } else {
-        projects.saveProjectAveData(aveData);
-    }
-    let dbFormatData = {};
-    for (let item of originData) {
-        dbFormatData[item[0]] = item[1];
-    }
-    project.saveProjectParams(dbFormatData, projectId, year, hot);
-}
-
 function processFile(file) {
     let excelData = {};
     let workbook = xlsx.read(file, {type:"buffer"});
@@ -367,6 +307,7 @@ function processFile(file) {
         }
     });
     excelData = excelData[workbook.SheetNames[0]];
+    console.log('origin excelData' , excelData);
     let tempExeclData = [];
     for (let item of excelData) {
         if (item.length > 0) {
@@ -374,17 +315,25 @@ function processFile(file) {
         }
     }
     excelData = tempExeclData;
-    excelData = dataFormat(excelData);    
+    excelData = dataFormat(excelData); 
+    console.log('after formsttttttt',excelData)   
     let aveData = {};
-    let len = excelData[0][1].length;
     for (let item of excelData) {
         let sum = 0;
+        let counter = 0;
         for (let i of item[1]) {
-            sum += parseFloat(i);
+            if (i) {
+                counter++;
+                sum += parseFloat(i);
+            }
         }
-        aveData[item[0]] = sum/len;
+        if (counter > 0) {
+            aveData[item[0]] = sum/counter;
+        } else {
+            aveData[item[0]] = null;
+        }
     }
-   
+   console.log('aveDataaaaa', aveData)
     return {
         originData: excelData,
         aveData: aveData
@@ -393,11 +342,23 @@ function processFile(file) {
 }
 
 function dataFormat(table) {
-    let columnName = table[0];
+    console.log('dataFormat');
+
+    let reverseData = [];
+    for (let item of table[0]){
+        reverseData.push([]);
+    }
+
+    for (let item of table) {
+        for (let i=0;i<item.length;i++) {
+            reverseData[i].push(item[i]);
+        }
+    }
+    console.log('reverseData', reverseData)
     let res = [];
-    for (let i=0;i<columnName.length;i++) {
+    for (let i=0;i<reverseData.length;i++) {
         let item = [];
-        let name = columnName[i];
+        let name = reverseData[i][0];
         if (/用户侧供水温度/.test(name)) {
             item.push('tui');
         } else if (/用户侧回水温度/.test(name)) {
@@ -417,13 +378,18 @@ function dataFormat(table) {
         } else if (/地源侧水泵总耗电/.test(name)) {
             item.push('pg');
         }
-        item.push([]);
-        res.push(item);
-    }
-    
-    for (let i=1;i<table.length;i++) {
-        for (let j=0;j<columnName.length;j++) {
-            res[j][1].push(table[i][j]);
+        if (item.length > 0) {
+            let arr = [];
+            for (let dataItem of reverseData[i]) {
+                if (dataItem === undefined) {
+                    arr.push(null);
+                } else {
+                    arr.push(dataItem);
+                }
+            }
+            console.log(arr);
+            item.push(arr.slice(1))
+            res.push(item);
         }
     }
     return res;
