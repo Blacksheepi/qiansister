@@ -13,6 +13,7 @@ router.get('/', async (req, res, next) => {
         logger.err({
             info: 'getProjects failed!'
         }, err)
+        throw err;
     }
 });
 

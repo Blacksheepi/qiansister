@@ -1,10 +1,10 @@
 {
     "db": {
         "host": "127.0.0.1",
-        "port": 5432,
-        "database": "gshp",
+        "port": 4321,
+        "database": "postgres",
         "user": "postgres",
-        "password": "qiansister"
+        "password": "123456"
     },
     "session": {
     	"name": "SID",
