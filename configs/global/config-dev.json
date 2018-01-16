@@ -1,7 +1,7 @@
 {
     "db": {
         "host": "127.0.0.1",
-        "port": 5433,
+        "port": 5432,
         "database": "test_db",
         "user": "test",
         "password": "123456"
@@ -14,5 +14,10 @@
 		    "secure":   false,
 		    "maxAge":   3600000
 		}
+    },
+    "redisStore": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "ttl": 300
     }
 }

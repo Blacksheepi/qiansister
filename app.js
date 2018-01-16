@@ -6,11 +6,15 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import session from 'express-session'
 import compression from 'compression'
+import passport from 'passport'
+import redis from 'redis'
+import connectRedis from 'connect-redis'
 
 import index from './routes/index'
 import users from './routes/users'
 import router from './routes/index'
 import config from './configs/global/config'
+import setPassport from './lib/auth'
 
 let app = express();
 
@@ -27,7 +31,7 @@ app.all('*', (req, res, next) => {
     }
 });
 
-app.use(compression());
+app.use(compression());   //compression sending to user content use gzip
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -41,13 +45,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(session({
-//    name: config.session.name,
-//    secret: config.session.secret,
-//    resave: true,
-//    saveUninitialized: false,
-//    cookie: config.session.cookie,
-// }));
+let redisClient = redis.createClient();
+let redisStore = connectRedis(session);
+app.use(session({
+   name: config.session.name,
+   secret: config.session.secret,
+   resave: true,
+   saveUninitialized: false,
+   cookie: config.session.cookie,
+   store: new redisStore({
+    host: config.redisStore.host,
+    port : config.redisStore.port,
+    client: redisClient,
+    ttl: config.redisStore.ttl
+   })
+}));
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+setPassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 router(app);
 
@@ -63,6 +88,7 @@ app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
+    console.log(err);
 
     // render the error page
     res.status(err.status || 500);

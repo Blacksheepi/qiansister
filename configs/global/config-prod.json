@@ -14,5 +14,10 @@
 		    "secure":   false,
 		    "maxAge":   3600000
 		}
+    },
+    "redisStore": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "ttl": 300
     }
 }
