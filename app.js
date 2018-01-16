@@ -53,12 +53,12 @@ app.use(session({
    resave: true,
    saveUninitialized: false,
    cookie: config.session.cookie,
-   store: new redisStore({
-    host: config.redisStore.host,
-    port : config.redisStore.port,
-    client: redisClient,
-    ttl: config.redisStore.ttl
-   })
+   // store: new redisStore({
+   //  host: config.redisStore.host,
+   //  port : config.redisStore.port,
+   //  client: redisClient,
+   //  ttl: config.redisStore.ttl
+   // })
 }));
 
 passport.serializeUser(function(user, done) {
