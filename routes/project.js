@@ -42,7 +42,15 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
     if (files.hotFile) {
 
         let hotFile = files.hotFile[0].buffer;
-        let hotData = processFile(hotFile);
+        let hotData;
+        try {
+            hotData = processFile(hotFile);
+        } catch (err) {
+            res.status(400).json({
+                msg: '请使用给定模板文件添加数据后上传！'
+            });
+            return;
+        }
         //saveData(hotData, id, true, hotYear);
         let originData = hotData.originData;
         let aveData = hotData.aveData; 
@@ -69,9 +77,17 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
-    if (files.coldFile) {
+    else if (files.coldFile) {
         let coldFile = files.coldFile[0].buffer;
-        let coldData = processFile(coldFile);
+        let coldData;
+        try {
+            coldData = processFile(coldFile);
+        } catch (err) {
+            res.status(400).json({
+                msg: '请使用给定模板文件添加数据后上传！'
+            });
+            return;
+        }
         let originData = coldData.originData;
         let aveData = coldData.aveData;
         aveData.hot = false;
@@ -94,7 +110,24 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             });
             throw err;
         }
+    } else {
+        try {
+            let id = await projects.addProjectInfo(projectInfo);
+            res.json({
+                id: id
+            })
+        } catch (err) {
+            logger.err({
+                info: 'addProject failed!',
+                req: req.body,
+            }, err);
+            res.status(500).json({
+                msg: '存入数据库失败！'
+            });
+            throw err;
+        }
     }
+
 });
 
 router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
@@ -120,7 +153,15 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     if (files.hotFile) {
         let hasAveData = false;
         let hotFile = files.hotFile[0].buffer;
-        let hotData = processFile(hotFile);
+        let hotData;
+        try {
+            hotData = processFile(hotFile);
+        } catch (err) {
+            res.status(400).json({
+                msg: '请使用给定模板文件添加数据后上传！'
+            });
+            return;
+        }
         //saveData(hotData, id, true, hotYear);
         let oldProjectAveData = await projects.getProjectAveData(true, id);
         console.log('oldProjectAveData',oldProjectAveData)
@@ -154,7 +195,8 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         };
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
-            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, true, id, hasAveData);    
+            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, true, id, hasAveData);
+            res.json({msg: 'update success!'})    
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -166,12 +208,20 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
-    if (files.coldFile) {
+    else if (files.coldFile) {
         let hasAveData = false;
         let coldFile = files.coldFile[0].buffer;
-        let coldData = processFile(coldFile);
+        let coldData;
+        try {
+            coldData = processFile(coldFile);
+        } catch (err) {
+            res.status(400).json({
+                msg: '请使用给定模板文件添加数据后上传！'
+            });
+            return;
+        }
         //saveData(hotData, id, true, hotYear);
-        let oldProjectAveData = await projects.getProjectAveData(true, id);
+        let oldProjectAveData = await projects.getProjectAveData(false, id);
         console.log('oldProjectAveData',oldProjectAveData)
         if (oldProjectAveData[0]) {
             hasAveData = true;
@@ -202,7 +252,8 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         };
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
-            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, false, id, hasAveData);    
+            await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, false, id, hasAveData);
+            res.json({msg: 'update success!'})    
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -213,10 +264,21 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             });
             throw err;
         }
+    } else {
+        try {
+            projects.updateProjectInfo(projectInfo, id);
+            res.json({msg: 'update success!'})
+        } catch (err) {
+            logger.err({
+                info: 'updateProject failed!',
+                req: req.body
+            }, err);
+            res.status(500).json({
+                msg: '更新失败！'
+            });
+            throw err;
+        }
     }
-    res.json({
-        id: id
-    });
 })
 
 router.get('/projectAveParams', async (req, res, next) => {
@@ -299,7 +361,8 @@ router.get('/projectAllParams', async (req, res, next) => {
 
 function processFile(file) {
     let excelData = {};
-    let workbook = xlsx.read(file, {type:"buffer"});
+    let workbook = xlsx.read(file, {type:"buffer"}); 
+
     workbook.SheetNames.forEach((sheetName) => {
         let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
         if (roa.length) {
@@ -307,6 +370,7 @@ function processFile(file) {
         }
     });
     excelData = excelData[workbook.SheetNames[0]];
+
     console.log('origin excelData' , excelData);
     let tempExeclData = [];
     for (let item of excelData) {
@@ -316,7 +380,7 @@ function processFile(file) {
     }
     excelData = tempExeclData;
     excelData = dataFormat(excelData); 
-    console.log('after formsttttttt',excelData)   
+    console.log('after formarttttttt',excelData)   
     let aveData = {};
     for (let item of excelData) {
         let sum = 0;
@@ -377,6 +441,10 @@ function dataFormat(table) {
             item.push('pu');
         } else if (/地源侧水泵总耗电/.test(name)) {
             item.push('pg');
+        } else if (name === 'P' || name === 'p') {
+            item.push('p');
+        } else if (name === 'P2' || name === 'p2') {
+            item.push('p2')
         }
         if (item.length > 0) {
             let arr = [];

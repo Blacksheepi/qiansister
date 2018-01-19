@@ -53,13 +53,21 @@ app.use(session({
    resave: true,
    saveUninitialized: false,
    cookie: config.session.cookie,
-   // store: new redisStore({
-   //  host: config.redisStore.host,
-   //  port : config.redisStore.port,
-   //  client: redisClient,
-   //  ttl: config.redisStore.ttl
-   // })
+   store: new redisStore({
+    host: config.redisStore.host,
+    port : config.redisStore.port,
+    client: redisClient,
+    ttl: config.redisStore.ttl
+   })
 }));
+
+// use this middleware to reset cookie expiration time
+// when user hit page every time
+app.use(function(req, res, next){
+    req.session._garbage = Date();
+    req.session.touch();
+    next();
+});
 
 passport.serializeUser(function(user, done) {
   done(null, user);
