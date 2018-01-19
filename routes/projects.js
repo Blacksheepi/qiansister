@@ -17,4 +17,8 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+router.delete('/', (req, res, next) => {
+	
+})
+
 export default router;

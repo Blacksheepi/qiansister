@@ -1,6 +1,7 @@
 import db from '../lib/db'
 
 export default {
+    
 	getProjectsInfo () {
 		let q = 'SELECT * FROM projects';
 		return db.executeQuery(q, []);
