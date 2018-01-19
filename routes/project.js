@@ -27,7 +27,7 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
     let beginTime = body.beginTime;
     let hotYear = body.hotYear;
     let coldYear = body.coldYear;
-    let id = 0;
+    let id;
 
     let projectInfo = {};
     projectInfo.projectName = projectName;
@@ -62,10 +62,13 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         };
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
-            let id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true);  
-            res.json({
-                id: id
-            });   
+            id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true); 
+            if (!files.coldFile) {
+                res.json({
+                    id: id
+                }); 
+                return; 
+            } 
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -77,7 +80,7 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
-    else if (files.coldFile) {
+    if (files.coldFile) {
         let coldFile = files.coldFile[0].buffer;
         let coldData;
         try {
@@ -96,10 +99,19 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
             dbFormatData[item[0]] = item[1];
         };
         try {
-            let id = await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false);
-            res.json({
-                id: id
-            });    
+            console.log('idddddddddddddddddd', id);
+            if (id) {
+                await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false, true, id);
+                res.json({
+                    id: id
+                });    
+            } else {
+                let id = await projects.addProject(projectInfo, aveData, dbFormatData, coldYear, false, false);
+                res.json({
+                    id: id
+                });    
+            } 
+            return; 
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -162,6 +174,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             });
             return;
         }
+        console.log('222222');
         //saveData(hotData, id, true, hotYear);
         let oldProjectAveData = await projects.getProjectAveData(true, id);
         console.log('oldProjectAveData',oldProjectAveData)
@@ -414,7 +427,7 @@ function dataFormat(table) {
     }
 
     for (let item of table) {
-        for (let i=0;i<item.length;i++) {
+        for (let i=0;i<table[0].length;i++) {
             reverseData[i].push(item[i]);
         }
     }

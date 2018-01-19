@@ -18,7 +18,20 @@ router.get('/', async (req, res, next) => {
 });
 
 router.delete('/', (req, res, next) => {
-	
+
+	let id = req.query.id;
+	try {
+		projects.deleteProject(id);
+		res.json({
+			msg: 'delete success!'
+		})
+	} catch (err) {
+		 logger.err({
+            info: 'delete Project failed!',
+            req: id
+        }, err)
+        throw err;
+	}
 })
 
 export default router;

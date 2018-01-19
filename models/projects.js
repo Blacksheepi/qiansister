@@ -1,7 +1,10 @@
 import db from '../lib/db'
 
 export default {
-    
+    deleteProject (id) {
+        let q = 'DELETE FROM projects WHERE id = ' + id;
+        return db.executeQuery(q, []);
+    },
 	getProjectsInfo () {
 		let q = 'SELECT * FROM projects';
 		return db.executeQuery(q, []);
@@ -43,19 +46,26 @@ export default {
     updateProjectInfo (projectInfo, id) {
         return db.updateFields('projects', 'id', id, projectInfo);
     },
-	addProject (projectInfo, aveData, projectParams, year, hot) {
+	addProject (projectInfo, aveData, projectParams, year, hot, isAddedInfo, id) {
 		return new Promise(async (resolve, reject) => {
-			let id;
+            if (!id) {
+                let id;
+            }
 		    let insertFunc = (dbClient, projectInfo, aveData, projectParams, year, hot) => {
 
 		        return new Promise (async (resolve, reject) => {
 		        	try {
 		        		console.log('projectInfo', projectInfo)
-		        	    let q = 'INSERT INTO projects(project_name, area, position, type, begin_time) VALUES ($1, $2, $3, $4, $5) RETURNING id';
-        			    let params = [projectInfo.projectName, projectInfo.area, projectInfo.position, projectInfo.type, projectInfo.beginTime];
-            			let res = await dbClient.query(q, params);
-            			console.log('project info add success!');
-            			id = res.rows[0].id;      
+
+                        if (isAddedInfo) {  //when add cold file and hot file both, project info only need add once
+
+                        } else {
+                            let q = 'INSERT INTO projects(project_name, area, position, type, begin_time) VALUES ($1, $2, $3, $4, $5) RETURNING id';
+                            let params = [projectInfo.projectName, projectInfo.area, projectInfo.position, projectInfo.type, projectInfo.beginTime];
+                            let res = await dbClient.query(q, params);
+                            console.log('project info add success!');
+                            id = res.rows[0].id;      
+                        }
 
             			//save params average data to table projects_params 
             			let q1 = 'INSERT INTO projects_params(p, p2, tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, hot, project_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)';
@@ -73,6 +83,7 @@ export default {
                 		}
                 		let q2 = 'INSERT INTO project_params(p, p2, tui, tuo, tgi, tgo, gu, gg, pl, pu, pg, project_id, time, hot) ';
                 		q2 += unionStr;
+                        console.log(q2);
                 		await dbClient.query(q2, []);
                 		console.log('project params add success!');
                 		resolve();
