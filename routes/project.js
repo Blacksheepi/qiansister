@@ -1,4 +1,3 @@
-
 import express from 'express'
 import project from '../models/project'
 import projects from '../models/projects'
@@ -59,7 +58,7 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         let dbFormatData = {};
         for (let item of originData) {
             dbFormatData[item[0]] = item[1];
-        };
+        }
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
             id = await projects.addProject(projectInfo, aveData, dbFormatData, hotYear, true); 
@@ -262,7 +261,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         let dbFormatData = {};
         for (let item of originData) {
             dbFormatData[item[0]] = item[1];
-        };
+        }
         //project.saveProjectParams(dbFormatData, projectId, year, hot);
         try {
             await projects.updateProject(projectInfo, aveData, dbFormatData, hotYear, false, id, hasAveData);
@@ -391,6 +390,7 @@ function processFile(file) {
             tempExeclData.push(item);
         }
     }
+    //var table=[['time','gg','gu','tui'],['2018/1/1 00:00',1,2,3],['2018/1/1 01:00',4,5,6]];
     excelData = tempExeclData;
     excelData = dataFormat(excelData); 
     console.log('after formarttttttt',excelData)   
@@ -469,11 +469,13 @@ function dataFormat(table) {
                 }
             }
             console.log(arr);
-            item.push(arr.slice(1))
+            item.push(arr.slice(1));
             res.push(item);
         }
     }
     return res;
 }
+
+
 
 export default router;

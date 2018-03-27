@@ -45,29 +45,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let redisClient = redis.createClient();
-let redisStore = connectRedis(session);
-app.use(session({
-   name: config.session.name,
-   secret: config.session.secret,
-   resave: true,
-   saveUninitialized: false,
-   cookie: config.session.cookie,
-   store: new redisStore({
-    host: config.redisStore.host,
-    port : config.redisStore.port,
-    client: redisClient,
-    ttl: config.redisStore.ttl
-   })
-}));
+// let redisClient = redis.createClient();
+// let redisStore = connectRedis(session);
+// app.use(session({
+//    name: config.session.name,
+//    secret: config.session.secret,
+//    resave: true,
+//    saveUninitialized: false,
+//    cookie: config.session.cookie,
+//    store: new redisStore({
+//     host: config.redisStore.host,
+//     port : config.redisStore.port,
+//     client: redisClient,
+//     ttl: config.redisStore.ttl
+//    })
+// }));
 
 // use this middleware to reset cookie expiration time
 // when user hit page every time
-app.use(function(req, res, next){
-    req.session._garbage = Date();
-    req.session.touch();
-    next();
-});
+// app.use(function(req, res, next){
+//     req.session._garbage = Date();
+//     req.session.touch();
+//     next();
+// });
 
 passport.serializeUser(function(user, done) {
   done(null, user);
