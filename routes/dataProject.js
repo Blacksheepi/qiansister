@@ -58,8 +58,17 @@ router.get('/getProjectsParamsByIdAndYear', async (req, res, next) => {
         try {
             console.log('id', id);
             console.log('year', year);
-            let projectParams = await dataProject.getProjectsParamsByIdAndYear(id, year);
-            res.json(projectParams);
+            let project = await dataProject.getProjectById(id);
+            let projectParams = [];
+            if (project.length > 0) {
+                projectParams = await dataProject.getProjectsParamsByIdAndYear(id, year);
+            }
+            let projectObj = {
+                id: id,
+                name: project.length > 0 ? project[0].name : '',
+                table: projectParams
+            };
+            res.json(projectObj);
         } catch (err) {
             logger.err({
                 info: 'getProjectALLParams failed!',
