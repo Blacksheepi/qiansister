@@ -20,6 +20,7 @@ let fields = [
 
 router.get('/', async (req, res, next) => {
     try {
+        console.log('后台getAllProjectsInfo');
         let data = await dataProject.getProjectsInfo();
         res.json(data);
     } catch (err) {
@@ -230,7 +231,6 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         }
         try {
             await dataProject.updateProject(projectInfo, dbFormatData, hotYear, true, id);
-            res.json({msg: 'update success!'})
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -242,7 +242,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
-    else if (files.coldFile) {
+    if (files.coldFile) {
         let coldFile = files.coldFile[0].buffer;
         let coldData;
         try {
@@ -263,7 +263,6 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         }
         try {
             await dataProject.updateProject(projectInfo, dbFormatData, coldYear, false, id);
-            res.json({msg: 'update success!'})
         } catch (err) {
             logger.err({
                 info: 'addProject failed!',
@@ -276,7 +275,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         }
     } else {
         try {
-            dataProject.updateProjectInfo(projectInfo, id);
+            await dataProject.updateProjectInfo(projectInfo, id);
             res.json({msg: 'update success!'})
         } catch (err) {
             logger.err({
@@ -289,6 +288,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
+    res.json({msg: 'update success!'})
 })
 
 router.delete('/delete', (req, res, next) => {
@@ -297,7 +297,7 @@ router.delete('/delete', (req, res, next) => {
     try {
         dataProject.deleteProject(id);
         res.json({
-            msg: 'delete success!'
+            msg: 'delete success!',
         })
     } catch (err) {
         logger.err({
@@ -335,19 +335,16 @@ function processFile(file) {
 }
 
 function dataFormat(table) {
-    console.log('dataFormat');
-
+    console.log('dataFormat',table);
     let reverseData = [];
     for (let item of table[0]) {
         reverseData.push([]);
     }
-
     for (let item of table) {
         for (let i = 0; i < table[0].length; i++) {
             reverseData[i].push(item[i]);
         }
     }
-
     let res = [];
     for (let i = 0; i < reverseData.length; i++) {
         let item = [];

@@ -29,18 +29,18 @@ export default {
 
     /*没有上传附件的时候调用*/
     addProjectInfo (projectInfo) {
-        let q = 'INSERT INTO projects(name) VALUES ($1) RETURNING id';
+        let q = 'INSERT INTO data_project(name) VALUES ($1) RETURNING id';
         let params = [projectInfo.name];
         return new Promise(async (resolve, reject) => {
             try {
                 let res = await db.executeQuery(q, params);
                 console.log('res', res);
                 let id = res[0].id
-                console.log('project info add success!');
+                console.log('data_project info add success!');
                 console.log('id', id);
                 resolve(id);
             } catch (e) {
-                console.log('project info add failed!');
+                console.log('data_project info add failed!');
                 reject(e);
             }
         })
@@ -106,33 +106,11 @@ export default {
         return new Promise(async (resolve, reject) => {
             let insertFunc = (dbClient, projectInfo, projectParams, year, hot, id) => {
 
-                /* let updateFields = (tableName) => {
-                 let fieldArr = [];
-                 let params = [];
-                 let counter = 1;
-
-                 for (let field in projectInfo) {
-                 if (field === 'id') {
-                 continue;
-                 }
-                 fieldArr.push(`${field}=$${counter}`);
-                 params.push(projectInfo[field]);
-                 counter++;
-                 }
-                 params.push(id);
-
-                 let updateStr = fieldArr.join(', ');
-                 let queryStr = `UPDATE ${tableName} SET ${updateStr} WHERE ${id} = $${counter};`;
-                 console.log(queryStr);
-                 return dbClient.query(queryStr, params);
-                 };*/
-
                 return new Promise(async (resolve, reject) => {
 
                     try {
                         await db.updateFields('data_project', 'id', id, projectInfo);
                         console.log('project info update success!');
-
                         let q1 = "UPDATE data_project_params SET name='" + projectInfo.name + "' WHERE project_id =" + id;
                         console.log('UPDATE data_project_params namenamenamename', q1);
                         await dbClient.query(q1, []);
@@ -141,6 +119,10 @@ export default {
                         //save project params to table project_params
                         let unionStr = '';
                         for (let i = 0; i < projectParams.time.length; i++) {
+                            let time = projectParams.time[i];
+                            //let select = "select * FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
+                            let d = "DELETE FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
+                            await dbClient.query(d, []);
                             unionStr += ` select '${projectInfo.name}', '${projectParams.time[i]}', ${projectParams.tui[i]}, ${projectParams.tuo[i]}, ${projectParams.tgi[i]}, ${projectParams.tgo[i]}, ${projectParams.gu[i]}, ${projectParams.gg[i]}, ${id}, '${year}', ${hot} union all`
                         }
                         if (projectParams) {
