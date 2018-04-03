@@ -18,7 +18,6 @@ export default {
 
     getProjectsParamsByIdAndYear (id, year, callback) {
         let q = "SELECT * FROM data_project_params WHERE project_id = " + id + " And year = '" + year + "'";
-        console.log(q);
         return db.executeQuery(q, []);
     },
 
@@ -34,13 +33,9 @@ export default {
         return new Promise(async (resolve, reject) => {
             try {
                 let res = await db.executeQuery(q, params);
-                console.log('res', res);
                 let id = res[0].id
-                console.log('data_project info add success!');
-                console.log('id', id);
                 resolve(id);
             } catch (e) {
-                console.log('data_project info add failed!');
                 reject(e);
             }
         })
@@ -58,7 +53,6 @@ export default {
 
                 return new Promise(async (resolve, reject) => {
                     try {
-                        console.log('projectInfo', projectInfo)
 
                         if (isAddedInfo) {  //when add cold file and hot file both, project info only need add once
 
@@ -66,7 +60,6 @@ export default {
                             let q = 'INSERT INTO data_project(name) VALUES ($1) RETURNING id';
                             let params = [projectInfo.name];
                             let res = await dbClient.query(q, params);
-                            console.log('project info add success!');
                             id = res.rows[0].id;
                         }
 
@@ -79,12 +72,9 @@ export default {
                         if (projectParams) {
                             unionStr = unionStr.slice(0, -9);
                         }
-                        console.log(unionStr);
                         let q2 = 'INSERT INTO data_project_params(name, time, tui, tuo, tgi, tgo, gu, gg,  project_id, year, hot) ';
                         q2 += unionStr;
-                        console.log(q2);
                         await dbClient.query(q2, []);
-                        console.log('project params add success!');
                         resolve();
                     } catch (e) {
                         reject(e);
@@ -110,17 +100,13 @@ export default {
 
                     try {
                         await db.updateFields('data_project', 'id', id, projectInfo);
-                        console.log('project info update success!');
                         let q1 = "UPDATE data_project_params SET name='" + projectInfo.name + "' WHERE project_id =" + id;
-                        console.log('UPDATE data_project_params namenamenamename', q1);
                         await dbClient.query(q1, []);
-                        console.log('data_project_params update success!');
 
                         //save project params to table project_params
                         let unionStr = '';
                         for (let i = 0; i < projectParams.time.length; i++) {
                             let time = projectParams.time[i];
-                            //let select = "select * FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
                             let d = "DELETE FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
                             await dbClient.query(d, []);
                             unionStr += ` select '${projectInfo.name}', '${projectParams.time[i]}', ${projectParams.tui[i]}, ${projectParams.tuo[i]}, ${projectParams.tgi[i]}, ${projectParams.tgo[i]}, ${projectParams.gu[i]}, ${projectParams.gg[i]}, ${id}, '${year}', ${hot} union all`
@@ -130,9 +116,7 @@ export default {
                         }
                         let q2 = 'INSERT INTO data_project_params(name, time, tui, tuo, tgi, tgo, gu, gg,  project_id, year, hot) ';
                         q2 += unionStr;
-                        console.log(q2);
                         await dbClient.query(q2, []);
-                        console.log('data project params insert success!');
                         resolve();
                     } catch (e) {
                         reject(e);
@@ -156,12 +140,9 @@ export default {
 
                     try {
                         await db.updateFields('data_project', 'id', id, projectInfo);
-                        console.log('project info update success!');
 
                         let q1 = "UPDATE data_project_params SET name='" + projectInfo.name + "' WHERE project_id =" + id;
-                        console.log('UPDATE data_project_params namenamenamename', q1);
                         await dbClient.query(q1, []);
-                        console.log('data_project_params update success!');
                         resolve();
                     } catch (e) {
                         reject(e);

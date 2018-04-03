@@ -20,7 +20,6 @@ let fields = [
 
 router.get('/', async (req, res, next) => {
     try {
-        console.log('后台getAllProjectsInfo');
         let data = await dataProject.getProjectsInfo();
         res.json(data);
     } catch (err) {
@@ -57,8 +56,6 @@ router.get('/getProjectsParamsByIdAndYear', async (req, res, next) => {
         });
     } else {
         try {
-            console.log('id', id);
-            console.log('year', year);
             let project = await dataProject.getProjectById(id);
             let projectParams = [];
             if (project.length > 0) {
@@ -93,8 +90,6 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
     let projectInfo = {};
     projectInfo.name = name;
 
-    console.log('reqBody', projectInfo);
-
     let files = req.files;
 
     if (files.hotFile) {
@@ -118,7 +113,6 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         }
 
         try {
-            console.log('上传数据', dbFormatData)
             id = await dataProject.addProject(projectInfo, dbFormatData, hotYear, true);
             if (!files.coldFile) {
                 res.json({
@@ -156,7 +150,6 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         }
 
         try {
-            console.log('idddddddddddddddddd', id);
             if (id) {
                 await dataProject.addProject(projectInfo, dbFormatData, coldYear, false, true, id);
                 res.json({
@@ -320,7 +313,6 @@ function processFile(file) {
     });
     excelData = excelData[workbook.SheetNames[0]];
 
-    console.log('origin excelData', excelData);
     let tempExeclData = [];
     for (let item of excelData) {
         if (item.length > 0) {
@@ -335,7 +327,6 @@ function processFile(file) {
 }
 
 function dataFormat(table) {
-    console.log('dataFormat',table);
     let reverseData = [];
     for (let item of table[0]) {
         reverseData.push([]);
@@ -377,7 +368,6 @@ function dataFormat(table) {
             res.push(item);
         }
     }
-    console.log('resresresresresres', res)
     return res;
 }
 
