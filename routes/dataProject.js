@@ -79,6 +79,31 @@ router.get('/getProjectsParamsByIdAndYear', async (req, res, next) => {
     }
 });
 
+router.get('/getParamsByIdAndYearAndSeaon', async (req, res, next) => {
+    let id = req.query.id;
+    let year = req.query.year.toString();
+    let isHot = req.query.isHot;
+    if (!id) {
+        res.status(400).json({
+            msg: '请求参数错误'
+        });
+    } else {
+        try {
+            let projectParams = await dataProject.getParamsByIdAndYearAndSeaon(id, year, isHot);
+            console.log(projectParams.length);
+            res.json(projectParams);
+        } catch (err) {
+            logger.err({
+                info: 'getParamsByIdAndYearAndSeaon failed!',
+                req: req.qruey
+            }, err);
+            res.status(500).json({
+                msg: '获取数据失败！'
+            })
+        }
+    }
+});
+
 router.post('/', upload.fields(fields), async (req, res, next) => {
 
     let body = req.body;
@@ -193,6 +218,8 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
 
 router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     let body = req.body;
+    let files = req.files;
+
     let name = body.name;
     let hotYear = body.hotYear;
     let coldYear = body.coldYear;
@@ -201,7 +228,6 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     let projectInfo = {};
     projectInfo.name = name;
 
-    let files = req.files;
 
     if (files.hotFile) {
 
@@ -210,7 +236,7 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         try {
             hotData = processFile(hotFile);
         } catch (err) {
-            res.status(400).json({
+            res.status(-5).json({
                 msg: '请使用给定模板文件添加数据后上传！'
             });
             return;
@@ -235,19 +261,19 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
             throw err;
         }
     }
+
     if (files.coldFile) {
         let coldFile = files.coldFile[0].buffer;
         let coldData;
         try {
             coldData = processFile(coldFile);
         } catch (err) {
-            res.status(400).json({
+            console.log(err);
+            res.status(-5).json({
                 msg: '请使用给定模板文件添加数据后上传！'
             });
             return;
         }
-
-
         let originData = coldData.originData;
 
         let dbFormatData = {};
@@ -282,7 +308,24 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         }
     }
     res.json({msg: 'update success!'})
-})
+});
+
+function updateProject(projectInfo, file, year, isHot, id) {
+    let data;
+
+    try {
+        data = processFile(file);
+    } catch (err) {
+        throw new Error(-5);
+    }
+    let originData = data.originData;
+
+    let dbFormatData = {};
+    for (let item of originData) {
+        dbFormatData[item[0]] = item[1];
+    }
+    return dataProject.updateProject(projectInfo, dbFormatData, year, isHot, id);
+}
 
 router.delete('/delete', (req, res, next) => {
 
@@ -302,28 +345,33 @@ router.delete('/delete', (req, res, next) => {
 })
 
 function processFile(file) {
-    let excelData = {};
-    let workbook = xlsx.read(file, {type: "buffer"});
+    // try {
+        let excelData = {};
+        let workbook = xlsx.read(file, {type: "buffer"});
 
-    workbook.SheetNames.forEach((sheetName) => {
-        let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
-        if (roa.length) {
-            excelData[sheetName] = roa;
-        }
-    });
-    excelData = excelData[workbook.SheetNames[0]];
+        workbook.SheetNames.forEach((sheetName) => {
+            let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
+            if (roa.length) {
+                excelData[sheetName] = roa;
+            }
+        });
+        excelData = excelData[workbook.SheetNames[0]];
 
-    let tempExeclData = [];
-    for (let item of excelData) {
-        if (item.length > 0) {
-            tempExeclData.push(item);
+        let tempExeclData = [];
+        for (let item of excelData) {
+            if (item.length > 0) {
+                tempExeclData.push(item);
+            }
         }
-    }
-    excelData = tempExeclData;
-    excelData = dataFormat(excelData);
-    return {
-        originData: excelData,
-    }
+        excelData = tempExeclData;
+        excelData = dataFormat(excelData);
+        return {
+            originData: excelData,
+        }
+    // } catch (err) {
+    //
+    //     throw err;
+    // }
 }
 
 function dataFormat(table) {

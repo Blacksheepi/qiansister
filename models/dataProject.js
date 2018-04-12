@@ -16,8 +16,14 @@ export default {
         return db.executeQuery(q, []);
     },
 
-    getProjectsParamsByIdAndYear (id, year, callback) {
+    getProjectsParamsByIdAndYear (id, year) {
         let q = "SELECT * FROM data_project_params WHERE project_id = " + id + " And year = '" + year + "'";
+        return db.executeQuery(q, []);
+    },
+
+    getParamsByIdAndYearAndSeaon(id, year, isHot){
+        let q = "SELECT * FROM data_project_params WHERE project_id = " + id + " And year = '" + year + "' AND hot=" + isHot;
+        console.log(q);
         return db.executeQuery(q, []);
     },
 
@@ -103,26 +109,33 @@ export default {
                         let q1 = "UPDATE data_project_params SET name='" + projectInfo.name + "' WHERE project_id =" + id;
                         await dbClient.query(q1, []);
 
+
+                        let d = "DELETE FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND hot=" + hot;
+                        await dbClient.query(d, []);
+                        console.log(d);
+
                         //save project params to table project_params
                         let unionStr = '';
                         for (let i = 0; i < projectParams.time.length; i++) {
-                            let time = projectParams.time[i];
-                            let d = "DELETE FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
-                            await dbClient.query(d, []);
+                            // let time = projectParams.time[i];
+                            // let d = "DELETE FROM data_project_params WHERE project_id =" + id + " AND year = '" + year + "' AND time='" + time + "' AND hot=" + hot;
+                            // await dbClient.query(d, []);
                             unionStr += ` select '${projectInfo.name}', '${projectParams.time[i]}', ${projectParams.tui[i]}, ${projectParams.tuo[i]}, ${projectParams.tgi[i]}, ${projectParams.tgo[i]}, ${projectParams.gu[i]}, ${projectParams.gg[i]}, ${id}, '${year}', ${hot} union all`
                         }
                         if (projectParams) {
                             unionStr = unionStr.slice(0, -9);
                         }
                         let q2 = 'INSERT INTO data_project_params(name, time, tui, tuo, tgi, tgo, gu, gg,  project_id, year, hot) ';
+                        console.log(q2);
                         q2 += unionStr;
                         await dbClient.query(q2, []);
+
                         resolve();
                     } catch (e) {
                         reject(e);
                     }
                 });
-            }
+            };
             try {
                 await db.transactions(insertFunc, [projectInfo, projectParams, year, hot, id]);
                 resolve(id)
@@ -156,7 +169,7 @@ export default {
                 reject('updateProject err');
                 throw err;
             }
-        })
+        }).catch(error => console.log('updateProjectInfo', error))
     }
 
 
