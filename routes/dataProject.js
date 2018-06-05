@@ -5,6 +5,7 @@ import express from 'express'
 import dataProject from '../models/dataProject'
 import multer from 'multer'
 import xlsx from 'xlsx'
+import moment from 'moment'
 import logger from '../lib/logger'
 
 let router = express.Router();
@@ -122,10 +123,11 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         let hotFile = files.hotFile[0].buffer;
         let hotData;
         try {
-            hotData = processFile(hotFile);
+            hotData = processFile(hotFile, hotYear, true);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -160,10 +162,11 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         let coldFile = files.coldFile[0].buffer;
         let coldData;
         try {
-            coldData = processFile(coldFile);
+            coldData = processFile(coldFile, coldYear, false);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -234,10 +237,11 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         let hotFile = files.hotFile[0].buffer;
         let hotData;
         try {
-            hotData = processFile(hotFile);
+            hotData = processFile(hotFile, hotYear, true);
         } catch (err) {
-            res.status(-5).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+            console.log(err);
+            res.status(400).json({
+                msg: err.message
             });
             return;
         }
@@ -266,11 +270,11 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         let coldFile = files.coldFile[0].buffer;
         let coldData;
         try {
-            coldData = processFile(coldFile);
+            coldData = processFile(coldFile, coldYear, false);
         } catch (err) {
             console.log(err);
-            res.status(-5).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+            res.status(400).json({
+                msg: err.message
             });
             return;
         }
@@ -310,22 +314,22 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
     res.json({msg: 'update success!'})
 });
 
-function updateProject(projectInfo, file, year, isHot, id) {
-    let data;
+/*function updateProject(projectInfo, file, year, isHot, id) {
+ let data;
 
-    try {
-        data = processFile(file);
-    } catch (err) {
-        throw new Error(-5);
-    }
-    let originData = data.originData;
+ try {
+ data = processFile(file);
+ } catch (err) {
+ throw new Error(-5);
+ }
+ let originData = data.originData;
 
-    let dbFormatData = {};
-    for (let item of originData) {
-        dbFormatData[item[0]] = item[1];
-    }
-    return dataProject.updateProject(projectInfo, dbFormatData, year, isHot, id);
-}
+ let dbFormatData = {};
+ for (let item of originData) {
+ dbFormatData[item[0]] = item[1];
+ }
+ return dataProject.updateProject(projectInfo, dbFormatData, year, isHot, id);
+ }*/
 
 router.delete('/delete', (req, res, next) => {
 
@@ -344,8 +348,8 @@ router.delete('/delete', (req, res, next) => {
     }
 })
 
-function processFile(file) {
-    // try {
+function processFile(file, year, isHot) {
+    try {
         let excelData = {};
         let workbook = xlsx.read(file, {type: "buffer"});
 
@@ -356,6 +360,12 @@ function processFile(file) {
             }
         });
         excelData = excelData[workbook.SheetNames[0]];
+        console.log('origin excelData', excelData);
+        if (!excelData || (excelData.length > 0 && excelData[0].length <= 0)) {
+            throw new Error('没有解析出Excel数据，您的Excel为空。请按照模板上传数据。');//empty excel
+        } else if (excelData.length < 2 || excelData[1].length <= 0) {
+            throw new Error('不能上传没有数据的表格！（您上传的表格需要包括表头和至少一条数据）');//data not enough
+        }
 
         let tempExeclData = [];
         for (let item of excelData) {
@@ -364,59 +374,112 @@ function processFile(file) {
             }
         }
         excelData = tempExeclData;
-        excelData = dataFormat(excelData);
+        excelData = dataFormat(excelData, year, isHot);
         return {
             originData: excelData,
         }
-    // } catch (err) {
-    //
-    //     throw err;
-    // }
+    } catch (err) {
+        console.error(err);
+        if (err.message) {
+            throw  new Error(err.message);
+        } else {
+            throw new Error('您上传的数据有问题，请按照模板格式上传！');
+        }
+    }
 }
 
-function dataFormat(table) {
-    let reverseData = [];
-    for (let item of table[0]) {
-        reverseData.push([]);
-    }
-    for (let item of table) {
-        for (let i = 0; i < table[0].length; i++) {
-            reverseData[i].push(item[i]);
+function dataFormat(table, year, isHot) {
+    try {
+        let reverseData = [];
+        for (let item of table[0]) {
+            reverseData.push([]);
         }
-    }
-    let res = [];
-    for (let i = 0; i < reverseData.length; i++) {
-        let item = [];
-        let name = reverseData[i][0];
-        if (/时间/.test(name)) {
-            item.push('time');
-        } else if (/用户进口/.test(name)) {
-            item.push('tui');
-        } else if (/用户出口/.test(name)) {
-            item.push('tuo');
-        } else if (/源侧进口/.test(name)) {
-            item.push('tgi');
-        } else if (/源侧出口/.test(name)) {
-            item.push('tgo');
-        } else if (/用户侧/.test(name)) {
-            item.push('gu');
-        } else if (/地源侧/.test(name)) {
-            item.push('gg');
-        }
-        if (item.length > 0) {
-            let arr = [];
-            for (let dataItem of reverseData[i]) {
-                if (!dataItem && dataItem !== 0) {
-                    arr.push(null);
-                } else {
-                    arr.push(dataItem);
-                }
+        for (let item of table) {
+            for (let i = 0; i < table[0].length; i++) {
+                reverseData[i].push(item[i]);
             }
-            item.push(arr.slice(1))
-            res.push(item);
+        }
+        //console.log('reverseData', reverseData);
+        /*reverseData:
+         [
+         [ '时间','2018/3/27 0:00','2018/3/27 1:00','2018/3/27 2:00'],
+         [ '源侧出口/℃','12.1','13.3','11.8'],
+         [ '源侧进口/℃','8.9','9.4','9.7'],
+         [ '用户出口/℃','32.7','32.8', '32.6'],
+         [ '用户进口/℃','35.4','35.2', '34.7'],
+         [ '地源侧/(m3/h)','326.9','327.2','275.0' ],
+         [ '用户侧(m3/h)','96.2','95.6','94.3']
+         ]*/
+        let res = [];
+        for (let i = 0; i < reverseData.length; i++) {
+            let item = [];
+            let name = reverseData[i][0];
+            if (/时间/.test(name)) {
+                item.push('time');
+                //console.log('reverseData[' + i + ']:', reverseData[i]);
+                let list = reverseData[i];
+                list = list.slice(1);
+                let timeArr = list.map((item) => {
+                    let startDate = isHot ? new Date(year + "/11/20 0:00") : new Date(year + "/4/15 0:00");
+                    let endDate = isHot ? new Date((parseInt(year) + 1).toString() + "/4/14 23:00") : new Date(year + "/11/19 23:00");
+                    if (moment(new Date(item)) && !moment(new Date(item)).isAfter(endDate) && !moment(new Date(item)).isBefore(startDate)) {
+                        let time = moment(new Date(item)).format('YYYY/MM/DD HH:mm');
+                        return time;
+                    } else {
+                        // console.log('map', item);// 2019/4/14 1:00
+                        // console.log('startDate', startDate);//2018/11/20
+                        // console.log('endDate', endDate);//2019/4/14 23：00
+                        // console.log('isBefore', moment(new Date(item)).isBefore(endDate));
+                        // console.log('isAfter', moment(new Date(item)).isAfter(endDate));
+                        // console.log('isBetween', moment(new Date(item)).isBetween(startDate, endDate));
+                        throw new Error('您上传的数中有不属于' + year + '年' + (isHot ? '供暖季' : '供冷季') + '的时间（比如：' + item + '），请检查后上传!');
+                    }
+                });
+                item.push(timeArr);
+                res.push(item);
+                continue;
+            } else if (/用户侧进口/.test(name)) {//用户进口
+                item.push('tui');
+            } else if (/用户侧出口/.test(name)) {//用户出口
+                item.push('tuo');
+            } else if (/地源侧进口/.test(name)) {//源侧进口
+                item.push('tgi');
+            } else if (/地源侧出口/.test(name)) {//源侧出口
+                item.push('tgo');
+            } else if (/用户侧流量/.test(name)) {//用户侧
+                item.push('gu');
+            } else if (/地源侧流量/.test(name)) {//地源侧
+                item.push('gg');
+            }
+            if (item.length > 0) {
+                let arr = [];
+                for (let dataItem of reverseData[i]) {
+                    //console.log('dataItem[' + i + ']:', dataItem);
+                    if (!dataItem && dataItem !== 0) {
+                        arr.push(null);
+                    } else {
+                        arr.push(dataItem);
+                    }
+                }
+                item.push(arr.slice(1))
+                //console.log('item[' + i + ']:', item);
+                res.push(item);
+            }
+        }
+        //res:
+        //[
+        // [ 'time',[ '2018/3/27 0:00','2018/3/27 1:00','2018/3/27 2:00']],
+        // [ 'tgo',[ '12.1','13.3','11.8']],
+        //]
+        return res;
+    } catch (err) {
+        console.error(err);
+        if (err.message) {
+            throw  new Error(err.message);
+        } else {
+            throw new Error('您上传的数据有问题，请按照模板格式上传！');
         }
     }
-    return res;
 }
 
 export default router;

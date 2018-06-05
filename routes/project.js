@@ -45,8 +45,9 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         try {
             hotData = processFile(hotFile);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -85,8 +86,9 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         try {
             coldData = processFile(coldFile);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -97,7 +99,6 @@ router.post('/', upload.fields(fields), async (req, res, next) => {
         for (let item of originData) {
             dbFormatData[item[0]] = item[1];
         }
-        ;
         try {
             console.log('idddddddddddddddddd', id);
             if (id) {
@@ -169,8 +170,9 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         try {
             hotData = processFile(hotFile);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -227,8 +229,9 @@ router.post('/updateProject', upload.fields(fields), async (req, res, next) => {
         try {
             coldData = processFile(coldFile);
         } catch (err) {
+            console.log(err);
             res.status(400).json({
-                msg: '请使用给定模板文件添加数据后上传！'
+                msg: err.message
             });
             return;
         }
@@ -374,18 +377,27 @@ router.get('/projectAllParams', async (req, res, next) => {
 function processFile(file) {
     let excelData = {};
     let workbook = xlsx.read(file, {type: "buffer"});
-
     workbook.SheetNames.forEach((sheetName) => {
         let roa = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1});
-        if (roa.length) {
+        if (roa && roa.length) {
             excelData[sheetName] = roa;
         }
     });
     excelData = excelData[workbook.SheetNames[0]];
 
     console.log('origin excelData', excelData);
+    if (!excelData || (excelData.length > 0 && excelData[0].length <= 0)) {
+        throw new Error('没有解析出Excel数据，您的Excel为空。请按照模板上传数据。');//empty excel
+    } else if (excelData.length < 2 || excelData[1].length <= 0) {
+        throw new Error('不能上传没有数据的表格！（您上传的表格需要包括表头和至少一条数据）');//data not enough
+    }
+    // else if (excelData[0] && excelData[0].length < 11) {
+    //throw new Error('表头数据不够');
+    // }
+
     let tempExeclData = [];
     for (let item of excelData) {
+        console.log(item);
         if (item.length > 0) {
             tempExeclData.push(item);
         }
@@ -454,9 +466,9 @@ function dataFormat(table) {
             item.push('pu');
         } else if (/地源侧水泵总耗电/.test(name)) {
             item.push('pg');
-        } else if (name === 'P' || name === 'p') {
+        } else if (/系统总耗电/.test(name) || name === 'P' || name === 'p') {
             item.push('p');
-        } else if (name === 'P2' || name === 'p2') {
+        } else if (/水泵总耗电/.test(name) || name === 'P2' || name === 'p2') {
             item.push('p2')
         }
         if (item.length > 0) {
