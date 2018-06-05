@@ -12,7 +12,7 @@
 		"cookie": {
 			"httpOnly": true,
 		    "secure":   false,
-		    "maxAge":   3600000
+		    "maxAge":   7200000
 		}
     }
 }
