@@ -34,6 +34,29 @@ router.delete('/', async (req, res, next) => {
         }, err)
         throw err;
     }
-})
+});
+
+
+router.delete('/deleteSeasonData', async (req, res, next) => {
+
+    let id = req.query.id;
+    let isHot = req.query.isHot;
+    try {
+        console.log('id', id);
+        console.log('isHot', isHot);
+        await projects.deleteSeasonData(id, isHot);
+        //let data = await projects.getProjectsInfo();
+        res.json({
+            msg: 'deleteSeasonData success!',
+            id: id
+        })
+    } catch (err) {
+        logger.err({
+            info: 'delete deleteSeasonData failed!',
+            req: id
+        }, err);
+        throw err;
+    }
+});
 
 export default router;

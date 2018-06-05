@@ -15,6 +15,7 @@ export default app => {
 	app.use('/projects', passport.authMiddleware, projects);
 	app.use('/project', passport.authMiddleware, project);
 	app.use('/dataProject', passport.authMiddleware, dataProject);
+
 	app.use('/templateFile' ,(req, res, next) => {
 
 		var options = {
@@ -25,7 +26,7 @@ export default app => {
                 'x-sent': true
             }
         };
-		res.sendFile('templateFile.xlsx', options, (err) => {
+		res.sendFile('PostEvaluateTemplate.xlsx', options, (err) => {
 			if (err) {
 				next(err);
 			}
@@ -41,7 +42,7 @@ export default app => {
                 'x-sent': true
             }
         };
-        res.sendFile('dataTemplateFile.xlsx', options, (err) => {
+        res.sendFile('DatabaseTemplate.xlsx', options, (err) => {
             if (err) {
                 next(err);
             }

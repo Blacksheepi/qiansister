@@ -71,7 +71,7 @@ export default {
 
                         //save project params to table project_params
                         //INSERT INTO data_project_params(time, tui, tuo, tgi, tgo, gu, gg,  project_id, year, hot)  values (2018/1/1 00:00, 3, 2) (2018/1/1 01:00, 6, 5 )
-                        let unionStr = ''
+                        let unionStr = '';
                         for (let i = 0; i < projectParams.time.length; i++) {
                             unionStr += ` select '${projectInfo.name}', '${projectParams.time[i]}', ${projectParams.tui[i]}, ${projectParams.tuo[i]},${projectParams.tgi[i]}, ${projectParams.tgo[i]}, ${projectParams.gu[i]}, ${projectParams.gg[i]},  ${id}, '${year}', ${hot} union all`
                         }
@@ -80,6 +80,8 @@ export default {
                         }
                         let q2 = 'INSERT INTO data_project_params(name, time, tui, tuo, tgi, tgo, gu, gg,  project_id, year, hot) ';
                         q2 += unionStr;
+                        console.log(q2);
+
                         await dbClient.query(q2, []);
                         resolve();
                     } catch (e) {
