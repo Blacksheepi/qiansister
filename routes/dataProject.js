@@ -426,12 +426,12 @@ function dataFormat(table, year, isHot) {
                         let time = moment(new Date(item)).format('YYYY/MM/DD HH:mm');
                         return time;
                     } else {
-                        // console.log('map', item);// 2019/4/14 1:00
-                        // console.log('startDate', startDate);//2018/11/20
-                        // console.log('endDate', endDate);//2019/4/14 23：00
-                        // console.log('isBefore', moment(new Date(item)).isBefore(endDate));
-                        // console.log('isAfter', moment(new Date(item)).isAfter(endDate));
-                        // console.log('isBetween', moment(new Date(item)).isBetween(startDate, endDate));
+                        console.log('map', item);// 2019/4/14 1:00
+                        console.log('startDate', startDate);//2018/11/20
+                        console.log('endDate', endDate);//2019/4/14 23：00
+                        console.log('isBefore', moment(new Date(item)).isBefore(endDate));
+                        console.log('isAfter', moment(new Date(item)).isAfter(endDate));
+                        console.log('isBetween', moment(new Date(item)).isBetween(startDate, endDate));
                         throw new Error('您上传的数中有不属于' + year + '年' + (isHot ? '供暖季' : '供冷季') + '的时间（比如：' + item + '），请检查后上传!');
                     }
                 });
