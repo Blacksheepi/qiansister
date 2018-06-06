@@ -112,10 +112,12 @@ export default {
                         console.log('project average data add success!');
 
                         //save project params to table project_params
-                        let unionStr = ''
+                        let unionStr = '';
+                        console.log('projectParams',projectParams);
                         for (let i = 0; i < projectParams.tui.length; i++) {
                             unionStr += ` select ${projectParams.p[i]}, ${projectParams.p2[i]}, ${projectParams.tui[i]}, ${projectParams.tuo[i]}, ${projectParams.tgi[i]}, ${projectParams.tgo[i]}, ${projectParams.gu[i]}, ${projectParams.gg[i]}, ${projectParams.pl[i]}, ${projectParams.pu[i]}, ${projectParams.pg[i]}, ${id}, '${year}', ${hot} union all`
                         }
+                        console.log('unionStr',unionStr);
                         if (projectParams) {
                             unionStr = unionStr.slice(0, -9);
                         }

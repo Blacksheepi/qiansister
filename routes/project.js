@@ -452,7 +452,7 @@ function dataFormat(table) {
             item.push('tui');
         } else if (/用户侧回水温度/.test(name)) {
             item.push('tuo');
-        } else if (/地源侧供水温差/.test(name)) {
+        } else if (/地源侧供水温度/.test(name)) {
             item.push('tgi');
         } else if (/地源侧回水温度/.test(name)) {
             item.push('tgo');
@@ -480,7 +480,7 @@ function dataFormat(table) {
                     arr.push(dataItem);
                 }
             }
-            console.log(arr);
+            console.log('arr',arr);
             item.push(arr.slice(1));
             res.push(item);
         }

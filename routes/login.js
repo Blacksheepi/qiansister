@@ -4,7 +4,9 @@ import user from '../models/user'
 
 let router = express.Router();
 
-router.post('/',passport.authenticate('local'),  (req, res) => {
+//passport.authenticate('local'),
+
+router.post('/',  (req, res) => {
     res.json({msg: 'success'});
 });
 router.post('/register', async (req, res, next) => {

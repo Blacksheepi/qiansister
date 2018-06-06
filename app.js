@@ -24,7 +24,7 @@ app.all('*', (req, res, next) => {
     res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Credentials", true); //可以带cookies
     res.header("X-Powered-By", '3.2.1')
-    if (req.method == 'OPTIONS') {
+    if (req.method === 'OPTIONS') {
         res.send(200);
     } else {
         next();
@@ -45,29 +45,31 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let redisClient = redis.createClient();
-let redisStore = connectRedis(session);
-app.use(session({
-   name: config.session.name,
-   secret: config.session.secret,
-   resave: true,
-   saveUninitialized: false,
-   cookie: config.session.cookie,
-   store: new redisStore({
-    host: config.redisStore.host,
-    port : config.redisStore.port,
-    client: redisClient,
-    ttl: config.redisStore.ttl
-   })
-}));
+//本地要注释掉的
+// let redisClient = redis.createClient();
+// let redisStore = connectRedis(session);
+// app.use(session({
+//    name: config.session.name,
+//    secret: config.session.secret,
+//    resave: true,
+//    saveUninitialized: false,
+//    cookie: config.session.cookie,
+//    store: new redisStore({
+//     host: config.redisStore.host,
+//     port : config.redisStore.port,
+//     client: redisClient,
+//     ttl: config.redisStore.ttl
+//    })
+// }));
 
 // use this middleware to reset cookie expiration time
 // when user hit page every time
-app.use(function(req, res, next){
-    req.session._garbage = Date();
-    req.session.touch();
-    next();
-});
+// app.use(function(req, res, next){
+//     req.session._garbage = Date();
+//     req.session.touch();
+//     next();
+// });
+//到这里为止
 
 passport.serializeUser(function(user, done) {
   done(null, user);
