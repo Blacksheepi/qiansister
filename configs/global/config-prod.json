@@ -11,8 +11,7 @@
 		"secret": "SID",
 		"cookie": {
 			"httpOnly": true,
-		    "secure":   false,
-		    "maxAge":   7200000
+		    "secure":   false
 		}
     },
     "redisStore": {

@@ -420,6 +420,7 @@ function dataFormat(table, year, isHot) {
                 let list = reverseData[i];
                 list = list.slice(1);
                 let timeArr = list.map((item) => {
+                    //2015/4/14  11:00:00 PM
                     let startDate = isHot ? new Date(year + "/11/20 0:00") : new Date(year + "/4/15 0:00");
                     let endDate = isHot ? new Date((parseInt(year) + 1).toString() + "/4/14 23:00") : new Date(year + "/11/19 23:00");
                     if (moment(new Date(item)) && !moment(new Date(item)).isAfter(endDate) && !moment(new Date(item)).isBefore(startDate)) {
