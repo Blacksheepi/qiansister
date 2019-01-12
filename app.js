@@ -64,11 +64,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // use this middleware to reset cookie expiration time
 // when user hit page every time
-app.use(function(req, res, next){
-    req.session._garbage = Date();
-    req.session.touch();
-    next();
-});
+// app.use(function(req, res, next){
+//     req.session._garbage = Date();
+//     req.session.touch();
+//     next();
+// });
 //到这里为止
 
 passport.serializeUser(function(user, done) {
